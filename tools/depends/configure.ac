@@ -336,18 +336,17 @@ case $host in
           platform_cflags+=" -fembed-bitcode"
           platform_cxxflags+=" -fembed-bitcode"
           sdk_name=$target_platform$use_sdk
-          platform_min_version="$target_platform-version-min=10.2"
+          platform_min_version="$target_platform-version-min=11.0"
 
+          // using a version earlier than 11.0 won't work on Xcode 9
           case $use_sdk in
-            10.2);;
-            10.2.*);;
             11.*);;
             12.*);;
             *)
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
               ;;
           esac
-        
+
         # If not tvOS (= iOS)
         else
           # setup which cpu to use
@@ -374,8 +373,8 @@ case $host in
           esac
 
         fi
-        
-        
+
+
         # Common to tvos and ios?
         if [ ! test "x$use_cpu" = "xarm64" ]; then
           platform_cflags+=" -mcpu=cortex-a8 -mfpu=neon"
@@ -390,7 +389,7 @@ case $host in
         platform_cxxflags+=" $cpu_flags"
       ;;
     esac
-    
+
 
     platform_cflags+=" -arch $use_cpu -m$platform_min_version"
     platform_ldflags+=" -arch $use_cpu -m$platform_min_version -isysroot $use_sdk_path -stdlib=libc++"
