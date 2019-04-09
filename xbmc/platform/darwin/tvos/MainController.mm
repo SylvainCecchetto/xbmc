@@ -1754,7 +1754,14 @@ MainController *g_xbmcController;
 int KODI_Run(bool renderGUI)
 {
   int status = -1;
-  
+
+  CAppParamParser appParamParser; // TODO: proper params
+  if (!g_application.Create(appParamParser))
+  {
+    ELOG(@"ERROR: Unable to create application. Exiting");
+    return status;
+  }
+
   //this can't be set from CAdvancedSettings::Initialize()
   //because it will overwrite the loglevel set with the --debug flag
 #ifdef _DEBUG
@@ -1768,16 +1775,9 @@ int KODI_Run(bool renderGUI)
   
   // not a failure if returns false, just means someone
   // did the init before us.
-    if (!CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->Initialized()){
-        //CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->Initialize();
-        // TODO
-    }
-
-  CAppParamParser appParamParser; // TODO: proper params
-  if (!g_application.Create(appParamParser))
-  {
-    ELOG(@"ERROR: Unable to create application. Exiting");
-    return status;
+  if (!CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->Initialized()){
+    //CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->Initialize();
+    // TODO
   }
   
   CAnnounceReceiver::GetInstance()->Initialize();
