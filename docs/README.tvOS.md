@@ -157,7 +157,7 @@ You can check `Users/Shared/xbmc-depends` directory content with:
 ls -l /Users/Shared/xbmc-depends
 ```
 
-**Start Xcode, open the Kodi project file** (`kodi.xcodeproj`) located in `$HOME/kodi-build` and hit `Build`.
+**Start Xcode, open the Kodi project file** (`kodi.xcodeproj`) located in `$HOME/kodi-build`, select `Generic TvOs Device` (or your actual connected device if you have it connected) and hit `Build`.
 
 **WARNING:** If you have selected a specific tvOS SDK Version in step 4 then you might need to adapt the active target to use the same tvOS SDK version, otherwise build will fail. Be sure to select a device configuration. Building for simulator is not supported.
 
@@ -243,6 +243,8 @@ For this to work you need to alter the Xcode project by setting your codesign id
 
 #### Signing using a free developer account
 
+Note that using a free developer account the signing will need to be reapplied every 7 days.
+
   1. Open the Xcode project in Xcode as above (requires Xcode 7 or later)
   2. Select Xcode->Preferences and select Accounts
     * Hit the + sign to add an Apple ID accoumt and Login.
@@ -254,6 +256,14 @@ For this to work you need to alter the Xcode project by setting your codesign id
 It's also important that you select the signing on all 4 spots in the project settings. After the last buildstep, our support script will do a full sign of all binaries and bundle them with the given identity, including all the `*.viz`, `*.pvr`, `*.so`, etc. files Xcode doesn't know anything about. This should allow you to deploy Kodi to all non-jailbroken devices the same way you deploy normal apps to.
 In that case Kodi will be sandboxed like any other app. All Kodi files are then located in the sandboxed *Documents* folder and can be easily accessed via iTunes file sharing.
 
+### Installing on AppleTV
+There are two options for deplying to your AppleTV 4/4K. The first is just by using Run in XCode for a debugging sessions.
+
+The alternative is deploy the the output of the `deb` target. To do this:
+
+  1. Choose Window > Devices and Simulators, then in the window that appears, click Devices.
+  2. On your Mac, select the Apple TV in the Devices pane.
+  3. Click the + symbol under `installed apps` and navigate to and select: `$HOME/kodi-build/build/Debug-appletvos/Kodi.app` and then `Open`.
 
 **[back to top](#table-of-contents)**
 
