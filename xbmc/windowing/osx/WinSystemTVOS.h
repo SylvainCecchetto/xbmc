@@ -14,16 +14,20 @@
 #include "windowing/WinSystem.h"
 #include "rendering/gles/RenderSystemGLES.h"
 #include "threads/CriticalSection.h"
+#include "threads/Timer.h"
 
 class IDispResource;
 class CVideoSyncIos;
 struct CADisplayLinkWrapper;
 
-class CWinSystemTVOS : public CWinSystemBase, public CRenderSystemGLES
+class CWinSystemTVOS : public CWinSystemBase, public CRenderSystemGLES, public ITimerCallback
 {
 public:
   CWinSystemTVOS();
   virtual ~CWinSystemTVOS();
+
+  // ITimerCallback interface
+  virtual void OnTimeout() override {}
 
   void MessagePush(XBMC_Event *newEvent);
   size_t GetQueueSize();
@@ -63,7 +67,7 @@ public:
 
   //virtual std::unique_ptr<CVideoSync> GetVideoSync(void *clock) override;
 
-  //bool InitDisplayLink(CVideoSyncIos *syncImpl);
+  bool InitDisplayLink(CVideoSyncIos *syncImpl);
   void DeinitDisplayLink(void);
   void OnAppFocusChange(bool focus);
   bool IsBackgrounded() const { return m_bIsBackgrounded; }
@@ -85,6 +89,7 @@ protected:
   CCriticalSection             m_resourceSection;
   std::vector<IDispResource*>  m_resources;
   bool         m_bIsBackgrounded;
+  CTimer                       m_lostDeviceTimer;
 
 private:
   bool GetScreenResolution(int* w, int* h, double* fps, int screenIdx);

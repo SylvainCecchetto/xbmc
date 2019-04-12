@@ -11,12 +11,18 @@
 #include "windowing/VideoSync.h"
 #include "guilib/DispResource.h"
 
-class CWinSystemIOS;
+// @todo create common parent class/interface, also update xbmc/windowing/osx/CMakeLists.txt
+#if defined(TARGET_DARWIN_IOS)
+#define WIN_SYSTEM_CLASS CWinSystemIOS
+#elif defined(TARGET_DARWIN_TVOS)
+#define WIN_SYSTEM_CLASS CWinSystemTVOS
+#endif
+class WIN_SYSTEM_CLASS;
 
 class CVideoSyncIos : public CVideoSync, IDispResource
 {
 public:
-  CVideoSyncIos(void *clock, CWinSystemIOS &winSystem) :
+  CVideoSyncIos(void *clock, WIN_SYSTEM_CLASS &winSystem) :
     CVideoSync(clock), m_winSystem(winSystem) {}
 
   // CVideoSync interface
@@ -38,6 +44,6 @@ private:
 
   int64_t m_LastVBlankTime = 0;  //timestamp of the last vblank, used for calculating how many vblanks happened
   CEvent m_abortEvent;
-  CWinSystemIOS &m_winSystem;
+  WIN_SYSTEM_CLASS &m_winSystem;
 };
 

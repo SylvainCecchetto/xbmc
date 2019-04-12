@@ -24,9 +24,11 @@ endif()
 
 if(CORE_SYSTEM_NAME STREQUAL tvos)
   set(SOURCES WinEventsTVOS.mm
-              WinSystemTVOS.mm)
+              WinSystemTVOS.mm
+              VideoSyncIos.cpp)
   set(HEADERS WinEventsTVOS.h
-              WinSystemTVOS.h)
+              WinSystemTVOS.h
+              VideoSyncIos.h)
 endif()
 
 core_add_library(windowing_osx)

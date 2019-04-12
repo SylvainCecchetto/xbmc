@@ -44,6 +44,12 @@
 #define CONST_TOUCHSCREEN "Touchscreen"
 #define CONST_EXTERNAL "External"
 
+// if there was a devicelost callback
+// but no device reset for 3 secs
+// a timeout fires the reset callback
+// (for ensuring that e.x. AE isn't stuck)
+#define LOST_DEVICE_TIMEOUT_MS 3000
+
 // IOSDisplayLinkCallback is declared in the lower part of the file
 @interface IOSDisplayLinkCallback : NSObject
 {
@@ -77,7 +83,7 @@ void CWinSystemTVOS::MessagePush(XBMC_Event *newEvent)
 
 size_t CWinSystemTVOS::GetQueueSize()
 {
-    dynamic_cast<CWinEventsTVOS&>(*m_winEvents).GetQueueSize();
+    return dynamic_cast<CWinEventsTVOS&>(*m_winEvents).GetQueueSize();
 }
 
 void CWinSystemTVOS::AnnounceOnLostDevice()
@@ -100,18 +106,15 @@ void CWinSystemTVOS::AnnounceOnResetDevice()
 
 void CWinSystemTVOS::StartLostDeviceTimer()
 {
-    /* TODO
     if (m_lostDeviceTimer.IsRunning())
         m_lostDeviceTimer.Restart();
     else
         m_lostDeviceTimer.Start(LOST_DEVICE_TIMEOUT_MS, false);
-     */
 }
 
 void CWinSystemTVOS::StopLostDeviceTimer()
 {
-    // TODO
-    //m_lostDeviceTimer.Stop();
+    m_lostDeviceTimer.Stop();
 }
 
 
@@ -136,18 +139,15 @@ int CWinSystemTVOS::GetDisplayIndexFromSettings()
   return screenIdx;
 }
 
-CWinSystemTVOS::CWinSystemTVOS() : CWinSystemBase()
+CWinSystemTVOS::CWinSystemTVOS() : CWinSystemBase(), m_lostDeviceTimer(this)
 {
   m_bIsBackgrounded = false;
   m_pDisplayLink = new CADisplayLinkWrapper;
   m_pDisplayLink->callbackClass = [[IOSDisplayLinkCallback alloc] init];
-  
-  // TODO
-  /*
+
   m_winEvents.reset(new CWinEventsTVOS());
 
-  CAESinkDARWINIOS::Register();
-   */
+//  CAESinkDARWINIOS::Register(); // @todo
 }
 
 CWinSystemTVOS::~CWinSystemTVOS()
@@ -462,32 +462,18 @@ void CWinSystemTVOS::OnAppFocusChange(bool focus)
 //--------------------------------------------------------------
 - (void) runDisplayLink
 {
-  /*
   NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
   if (_videoSyncImpl != nil)
   {
     _videoSyncImpl->IosVblankHandler();
   }
   [pool release];
-   */
 }
 @end
 
-/*
 bool CWinSystemTVOS::InitDisplayLink(CVideoSyncIos *syncImpl)
 {
-  //init with the appropriate display link for the
-  //used screen
-  if([[IOSScreenManager sharedInstance] isExternalScreen])
-  {
-    fprintf(stderr,"InitDisplayLink on external");
-  }
-  else
-  {
-    fprintf(stderr,"InitDisplayLink on internal");
-  }
-
-  unsigned int currentScreenIdx = [[IOSScreenManager sharedInstance] GetScreenIdx];
+  unsigned int currentScreenIdx = GetDisplayIndexFromSettings();
   UIScreen * currentScreen = [[UIScreen screens] objectAtIndex:currentScreenIdx];
   [m_pDisplayLink->callbackClass SetVideoSyncImpl:syncImpl];
   m_pDisplayLink->impl = [currentScreen displayLinkWithTarget:m_pDisplayLink->callbackClass selector:@selector(runDisplayLink)];
@@ -506,7 +492,6 @@ void CWinSystemTVOS::DeinitDisplayLink(void)
     [m_pDisplayLink->callbackClass SetVideoSyncImpl:nil];
   }
 }
- */
 //------------DisplayLink stuff end
 //--------------------------------------------------------------
 

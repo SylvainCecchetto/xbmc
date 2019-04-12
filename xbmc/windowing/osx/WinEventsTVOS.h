@@ -26,6 +26,8 @@ public:
     
     void MessagePush(XBMC_Event *newEvent);
     size_t GetQueueSize();
+
+    bool MessagePump();
 private:
   
     

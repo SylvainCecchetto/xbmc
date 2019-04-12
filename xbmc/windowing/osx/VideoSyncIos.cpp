@@ -11,8 +11,13 @@
 #include "utils/MathUtils.h"
 #include "cores/VideoPlayer/VideoReferenceClock.h"
 #include "windowing/GraphicContext.h"
-#include "windowing/osx/WinSystemIOS.h"
 #include "utils/TimeUtils.h"
+
+#if defined(TARGET_DARWIN_IOS)
+#include "windowing/osx/WinSystemIOS.h"
+#elif defined(TARGET_DARWIN_TVOS)
+#include "windowing/osx/WinSystemTVOS.h"
+#endif
 
 bool CVideoSyncIos::Setup(PUPDATECLOCK func)
 {
