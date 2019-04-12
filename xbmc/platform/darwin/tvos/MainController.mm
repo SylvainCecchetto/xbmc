@@ -114,6 +114,7 @@ MainController *g_xbmcController;
 @synthesize m_remoteIdleState;
 @synthesize m_remoteIdleTimeout;
 @synthesize m_shouldRemoteIdle;
+@synthesize m_RemoteOSDSwipes;
 @synthesize m_touchDirection;
 @synthesize m_touchBeginSignaled;
 
