@@ -572,6 +572,9 @@ bool CSettings::InitializeDefinitions()
 #elif defined(TARGET_DARWIN_IOS)
   if (CFile::Exists(SETTINGS_XML_FOLDER "darwin_ios.xml") && !Initialize(SETTINGS_XML_FOLDER "darwin_ios.xml"))
     CLog::Log(LOGFATAL, "Unable to load ios-specific settings definitions");
+#elif defined(TARGET_DARWIN_TVOS)
+  if (CFile::Exists(SETTINGS_XML_FOLDER "darwin_tvos.xml") && !Initialize(SETTINGS_XML_FOLDER "darwin_tvos.xml"))
+    CLog::Log(LOGFATAL, "Unable to load tvos-specific settings definitions");
 #endif
 #endif
 
