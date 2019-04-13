@@ -127,8 +127,7 @@ MainController *g_xbmcController;
   std::string actionName;
   
   // Translate using custom controller translator.
-  CCustomControllerTranslator customControllerTranslator;
-  if(customControllerTranslator.TranslateCustomControllerString(CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindowOrDialog(), "SiriRemote", buttonId, actionID, actionName))
+  if (CServiceBroker::GetInputManager().TranslateCustomControllerString(CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindowOrDialog(), "SiriRemote", buttonId, actionID, actionName))
   {
     // break screensaver
     g_application.ResetSystemIdleTimer();
