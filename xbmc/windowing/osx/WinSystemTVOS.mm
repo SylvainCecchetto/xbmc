@@ -147,7 +147,7 @@ CWinSystemTVOS::CWinSystemTVOS() : CWinSystemBase(), m_lostDeviceTimer(this)
 
   m_winEvents.reset(new CWinEventsTVOS());
 
-//  CAESinkDARWINIOS::Register(); // @todo
+  CAESinkDARWINIOS::Register();
 }
 
 CWinSystemTVOS::~CWinSystemTVOS()

@@ -125,6 +125,13 @@ if(CORE_SYSTEM_NAME STREQUAL ios)
                       Sinks/osx/CoreAudioHelpers.h)
 endif()
 
+if(CORE_SYSTEM_NAME STREQUAL tvos)
+  list(APPEND SOURCES Sinks/AESinkDARWINIOS.mm
+                      Sinks/osx/CoreAudioHelpers.cpp)
+  list(APPEND HEADERS Sinks/AESinkDARWINIOS.h
+                      Sinks/osx/CoreAudioHelpers.h)
+endif()
+
 if(CORE_SYSTEM_NAME STREQUAL android)
   list(APPEND SOURCES Sinks/AESinkAUDIOTRACK.cpp)
   list(APPEND HEADERS Sinks/AESinkAUDIOTRACK.h)
