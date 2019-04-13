@@ -120,7 +120,7 @@ MainController *m_xbmcController;
 
 static void SigPipeHandler(int s)
 {
-  NSLog(@"We Got a Pipe Single :%d____________", s);
+  NSLog(@"We Got a Pipe Signal: %d____________", s);
 }
 
 int main(int argc, char *argv[])
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
   int retVal = 0;
   @try
   {
-    retVal = UIApplicationMain(argc,argv,@"UIApplication",@"MainApplicationDelegate");
+    retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MainApplicationDelegate class]));
   }
   @catch (id theException) 
   {

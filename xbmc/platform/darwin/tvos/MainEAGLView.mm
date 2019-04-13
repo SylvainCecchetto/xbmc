@@ -61,12 +61,8 @@ using namespace KODI::MESSAGING;
   m_framebufferResizeRequested = FALSE;
   if ((self = [super initWithFrame:frame]))
   {
-    // Get the layer
-    CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
-
-    CGFloat scaleFactor = 1.0;
     UIScreen *currentScreen = [UIScreen mainScreen];;
-    scaleFactor = [self getScreenScale: currentScreen];
+    CGFloat scaleFactor = [self getScreenScale: currentScreen];
     
     //this will activate retina on supported devices
     if (scaleFactor > 1.0)
@@ -74,6 +70,8 @@ using namespace KODI::MESSAGING;
       CLog::Log(LOGINFO, "Enabling 4K for AppleTV4 4k %f", scaleFactor);
     }
 
+    // Get the layer
+    CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
     [eaglLayer setContentsScale:scaleFactor];
     [self setContentScaleFactor:scaleFactor];
     
@@ -235,18 +233,7 @@ using namespace KODI::MESSAGING;
 //--------------------------------------------------------------
 - (CGFloat) getScreenScale:(UIScreen *)screen
 {
-  CGFloat ret = 1.0;
-  if ([screen respondsToSelector:@selector(scale)])
-  {
-    // normal other iDevices report 1.0 here
-    // retina devices report 2.0 here
-    // this info is true as of 19.3.2012.
-    if([screen scale] > 1.0)
-    {
-      ret = [screen scale];
-    }
-  }
-  return ret;
+  return screen.scale;
 }
 
 @end
