@@ -183,7 +183,6 @@ class CAAudioUnitSink
 
     bool                m_setup;
     bool                m_activated;
-    id                  m_observer;
     AudioUnit           m_audioUnit;
     AudioStreamBasicDescription m_outputFormat;
     AERingBuffer       *m_buffer;
@@ -193,7 +192,6 @@ class CAAudioUnitSink
 
     unsigned int        m_sampleRate;
     unsigned int        m_frameSize;
-    unsigned int        m_frames;
 
     std::atomic<bool>   m_started;
 
