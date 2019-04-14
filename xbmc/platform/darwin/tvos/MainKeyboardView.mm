@@ -100,7 +100,7 @@ static CEvent keyboardFinishedEvent;
   }
   else
   {
-    [self initWithFrameInternal:nil];
+    [self initWithFrameInternal];
   }
   /*
   self = [super initWithFrame:frame];

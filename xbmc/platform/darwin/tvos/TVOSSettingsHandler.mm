@@ -58,15 +58,15 @@ void CTVOSInputSettings::Initialize()
   [g_xbmcController setRemoteIdleTimeout:timeout];
 }
 
-void CTVOSInputSettings::OnSettingChanged(const CSetting *setting)
+void CTVOSInputSettings::OnSettingChanged(std::shared_ptr<const CSetting> setting)
 {
-  if (setting == NULL)
+  if (setting == nullptr)
     return;
 
   const std::string &settingId = setting->GetId();
   if (settingId == CSettings::SETTING_INPUT_APPLESIRI)
   {
-    bool enable = dynamic_cast<const CSettingBool*>(setting)->GetValue();
+    bool enable = std::dynamic_pointer_cast<const CSettingBool>(setting)->GetValue();
     [g_xbmcController setSiriRemote:enable];
   }
   else if (settingId == CSettings::SETTING_INPUT_APPLESIRITIMEOUTENABLED)

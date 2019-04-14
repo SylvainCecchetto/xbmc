@@ -28,7 +28,7 @@ class CTVOSInputSettings : public ISettingCallback
 
   void Initialize();
 
-    virtual void OnSettingChanged(const CSetting *setting); // override;
+    virtual void OnSettingChanged(std::shared_ptr<const CSetting> setting) override;
 
 private:
   CTVOSInputSettings();
