@@ -531,6 +531,9 @@ void CNetworkLinux::SetNameServers(const std::vector<std::string>& nameServers)
 
 bool CNetworkLinux::PingHost(unsigned long remote_ip, unsigned int timeout_ms)
 {
+#if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS) // no system calls allowed since ios11
+  return false;
+#else
   char cmd_line [64];
 
   struct in_addr host_ip;
@@ -542,10 +545,7 @@ bool CNetworkLinux::PingHost(unsigned long remote_ip, unsigned int timeout_ms)
   sprintf(cmd_line, "ping -c 1 -w %d %s", timeout_ms / 1000 + (timeout_ms % 1000) != 0, inet_ntoa(host_ip));
 #endif
 
-  int status = -1;
-#if !defined (TARGET_DARWIN_IOS) && !defined (TARGET_DARWIN_TVOS)  // no system calls allowed since ios11
-  status = system (cmd_line);
-#endif
+  int status = system (cmd_line);
   int result = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 
   // http://linux.about.com/od/commands/l/blcmdl8_ping.htm ;
@@ -557,6 +557,7 @@ bool CNetworkLinux::PingHost(unsigned long remote_ip, unsigned int timeout_ms)
     CLog::Log(LOGERROR, "Ping fail : status = %d, errno = %d : '%s'", status, errno, cmd_line);
 
   return result == 0;
+#endif
 }
 
 #if defined(TARGET_DARWIN) || defined(TARGET_FREEBSD)

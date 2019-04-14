@@ -608,6 +608,8 @@ std::string CSysInfo::GetOsName(bool emptyIfUnknown /* = false*/)
     osName = GetKernelName(true); // FIXME: for FreeBSD OS name is a kernel name
 #elif defined(TARGET_DARWIN_IOS)
     osName = "iOS";
+#elif defined(TARGET_DARWIN_TVOS)
+    osName = "tvOS";
 #elif defined(TARGET_DARWIN_OSX)
     osName = "OS X";
 #elif defined (TARGET_ANDROID)
@@ -638,7 +640,7 @@ std::string CSysInfo::GetOsVersion(void)
 
 #if defined(TARGET_WINDOWS) || defined(TARGET_FREEBSD)
   osVersion = GetKernelVersion(); // FIXME: for Win32 and FreeBSD OS version is a kernel version
-#elif defined(TARGET_DARWIN_IOS)
+#elif defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
   osVersion = CDarwinUtils::GetIOSVersionString();
 #elif defined(TARGET_DARWIN_OSX)
   osVersion = CDarwinUtils::GetOSXVersionString();
@@ -730,7 +732,7 @@ std::string CSysInfo::GetOsPrettyNameWithVersion(void)
     osNameVer.append(" unknown");
 #elif defined(TARGET_WINDOWS_STORE)
   osNameVer = GetKernelName() + " " + GetOsVersion();
-#elif defined(TARGET_FREEBSD) || defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_OSX)
+#elif defined(TARGET_FREEBSD) || defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS) || defined(TARGET_DARWIN_OSX)
   osNameVer = GetOsName() + " " + GetOsVersion();
 #elif defined(TARGET_ANDROID)
   osNameVer = GetOsName() + " " + GetOsVersion() + " API level " +   StringUtils::Format("%d", CJNIBuild::SDK_INT);
@@ -806,7 +808,7 @@ std::string CSysInfo::GetModelName(void)
     char deviceCStr[PROP_VALUE_MAX];
     int propLen = __system_property_get("ro.product.model", deviceCStr);
     modelName.assign(deviceCStr, (propLen > 0 && propLen <= PROP_VALUE_MAX) ? propLen : 0);
-#elif defined(TARGET_DARWIN_IOS)
+#elif defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
     modelName = CDarwinUtils::getIosPlatformString();
 #elif defined(TARGET_DARWIN_OSX)
     size_t nameLen = 0; // 'nameLen' should include terminating null
@@ -927,7 +929,7 @@ int CSysInfo::GetKernelBitness(void)
       if (IsWow64Process(GetCurrentProcess(), &isWow64) && isWow64) // fallback
         kernelBitness = 64;
     }
-#elif defined(TARGET_DARWIN_IOS)
+#elif defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
     // Note: OS X return x86 CPU type without CPU_ARCH_ABI64 flag
     const NXArchInfo* archInfo = NXGetLocalArchInfo();
     if (archInfo)
@@ -1098,7 +1100,7 @@ std::string CSysInfo::GetUserAgent()
       result.append("; ARM");
   }
 #elif defined(TARGET_DARWIN)
-#if defined(TARGET_DARWIN_IOS)
+#if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
   std::string iDevStr(GetModelName()); // device model name with number of model version
   size_t iDevStrDigit = iDevStr.find_first_of("0123456789");
   std::string iDev(iDevStr, 0, iDevStrDigit);  // device model name without number
@@ -1111,10 +1113,20 @@ std::string CSysInfo::GetUserAgent()
       && iOSVersion.find_first_not_of('0', lastDotPos + 1) == std::string::npos)
     iOSVersion.erase(lastDotPos);
   StringUtils::Replace(iOSVersion, '.', '_');
-  if (iDev == "iPad" || iDev == "AppleTV")
-    result += "CPU OS ";
+  if (iDev == "AppleTV")
+  {
+    // check if it's ATV4 (AppleTV5,3) or later
+    size_t modelMajorNumberEndPos = iDevStr.find_first_of(',', iDevStrDigit);
+    std::string s{iDevStr, iDevStrDigit, modelMajorNumberEndPos - iDevStrDigit};
+    if (stoi(s) >= 5)
+      result += "CPU TVOS";
+    else
+      result += "CPU OS";
+  }
+  else if (iDev == "iPad")
+    result += "CPU OS";
   else
-    result += "CPU iPhone OS ";
+    result += "CPU iPhone OS";
   result += iOSVersion + " like Mac OS X";
 #else
   result += "Macintosh; ";
@@ -1180,7 +1192,7 @@ std::string CSysInfo::GetUserAgent()
 
 #ifdef TARGET_RASPBERRY_PI
   result += " HW_RaspberryPi/1.0";
-#elif defined (TARGET_DARWIN_IOS)
+#elif defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
   std::string iDevVer;
   if (iDevStrDigit == std::string::npos)
     iDevVer = "0.0";
@@ -1261,6 +1273,8 @@ std::string CSysInfo::GetBuildTargetPlatformName(void)
   return "OS X";
 #elif defined(TARGET_DARWIN_IOS)
   return "iOS";
+#elif defined(TARGET_DARWIN_TVOS)
+  return "tvOS";
 #elif defined(TARGET_FREEBSD)
   return "FreeBSD";
 #elif defined(TARGET_ANDROID)
@@ -1284,6 +1298,8 @@ std::string CSysInfo::GetBuildTargetPlatformVersion(void)
   return XSTR_MACRO(__MAC_OS_X_VERSION_MIN_REQUIRED);
 #elif defined(TARGET_DARWIN_IOS)
   return XSTR_MACRO(__IPHONE_OS_VERSION_MIN_REQUIRED);
+#elif defined(TARGET_DARWIN_TVOS)
+  return XSTR_MACRO(__TV_OS_VERSION_MIN_REQUIRED);
 #elif defined(TARGET_FREEBSD)
   return XSTR_MACRO(__FreeBSD_version);
 #elif defined(TARGET_ANDROID)
@@ -1320,6 +1336,9 @@ std::string CSysInfo::GetBuildTargetPlatformVersionDecoded(void)
 #elif defined(TARGET_DARWIN_IOS)
   return StringUtils::Format("version %d.%d.%d", (__IPHONE_OS_VERSION_MIN_REQUIRED / 10000) % 100,
                              (__IPHONE_OS_VERSION_MIN_REQUIRED / 100) % 100, __IPHONE_OS_VERSION_MIN_REQUIRED % 100);
+#elif defined(TARGET_DARWIN_TVOS)
+  return StringUtils::Format("version %d.%d.%d", (__TV_OS_VERSION_MIN_REQUIRED / 10000) % 100,
+                             (__TV_OS_VERSION_MIN_REQUIRED / 100) % 100, __TV_OS_VERSION_MIN_REQUIRED % 100);
 #elif defined(TARGET_FREEBSD)
   // FIXME: should works well starting from FreeBSD 8.1
   static const int major = (__FreeBSD_version / 100000) % 100;

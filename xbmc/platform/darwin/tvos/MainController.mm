@@ -986,7 +986,6 @@ MainController *g_xbmcController;
       }
       else // dont mimic apple siri remote
       {
-        XBMCKey key;
         switch (sender.state)
         {
           case UIGestureRecognizerStateBegan:
@@ -1003,7 +1002,7 @@ MainController *g_xbmcController;
             gesturePoint.x = gesturePoint.x/1.92;
             gesturePoint.y = gesturePoint.y/1.08;
             
-            key = [self getPanDirectionKey:gesturePoint];
+            XBMCKey key = [self getPanDirectionKey:gesturePoint];
             
             // ignore UP/DOWN swipes while in full screen playback
             if (CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindowOrDialog() != WINDOW_FULLSCREEN_VIDEO ||
@@ -1385,7 +1384,7 @@ MainController *g_xbmcController;
     if (inActive)
     {
       NSURL *url = [NSURL URLWithString:@"kodi://wakeup"];
-      [[UIApplication sharedApplication] openURL:url];
+      [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
     }
   });
   return inActive;

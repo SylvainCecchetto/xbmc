@@ -39,16 +39,16 @@ void CDarwinStorageProvider::GetLocalDrives(VECSOURCES &localDrives)
   CMediaSource share;
 
   // User home folder
-  #ifdef TARGET_DARWIN_IOS
-    share.strPath = "special://envhome/";
-  #else
-    share.strPath = getenv("HOME");
-  #endif
+#if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
+  share.strPath = "special://envhome/";
+#else
+  share.strPath = getenv("HOME");
+#endif
   share.strName = g_localizeStrings.Get(21440);
   share.m_ignore = true;
   localDrives.push_back(share);
 
-#if defined(TARGET_DARWIN_IOS)
+#if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
   // iOS Inbox folder
   share.strPath = "special://envhome/Documents/Inbox";
   share.strName = "Inbox";
@@ -170,7 +170,7 @@ std::vector<std::string> CDarwinStorageProvider::GetDiskUsage()
   std::vector<std::string> result;
   char line[1024];
 
-#ifdef TARGET_DARWIN_IOS
+#if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
   FILE* pipe = popen("df -ht hfs,apfs", "r");
 #else
   FILE* pipe = popen("df -HT ufs,cd9660,hfs,apfs,udf", "r");

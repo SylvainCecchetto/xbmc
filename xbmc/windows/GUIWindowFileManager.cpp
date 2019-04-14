@@ -519,13 +519,13 @@ bool CGUIWindowFileManager::Update(int iList, const std::string &strDirectory)
     pItem->SetLabelPreformatted(true);
     m_vecItems[iList]->Add(pItem);
 
-    #ifdef TARGET_DARWIN_IOS
+#if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
       CFileItemPtr iItem(new CFileItem("special://envhome/Documents/Inbox", true));
       iItem->SetLabel("Inbox");
       iItem->SetArt("thumb", "DefaultFolder.png");
       iItem->SetLabelPreformatted(true);
       m_vecItems[iList]->Add(iItem);
-    #endif
+#endif
   }
 
   // if we have a .tbn file, use itself as the thumb
@@ -1290,7 +1290,7 @@ void CGUIWindowFileManager::SetInitialPath(const std::string &path)
       m_rootDir.GetSources(shares);
       int iIndex = CUtil::GetMatchingSource(strDestination, shares, bIsSourceName);
       if (iIndex > -1
-#if defined(TARGET_DARWIN_IOS)
+#if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
           || URIUtils::PathHasParent(strDestination, "special://envhome/Documents/Inbox/")
 #endif
           || URIUtils::PathHasParent(strDestination, "special://profile/"))

@@ -212,7 +212,7 @@ std::string GetHomePath(const std::string& strTarget, std::string strPath)
     if (result == 0)
     {
       // Move backwards to last /.
-      for (int n = strlen(given_path) - 1; given_path[n] != '/'; n--)
+      for (size_t n = strlen(given_path) - 1; given_path[n] != '/'; n--)
         given_path[n] = '\0';
 
 #if defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_TVOS)
