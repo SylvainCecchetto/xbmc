@@ -9,11 +9,11 @@
 #include "WinEventsTVOS.h"
 #include "WinSystemTVOS.h"
 #include "cores/AudioEngine/Sinks/AESinkDARWINIOS.h"
-#include "cores/RetroPlayer/process/ios/RPProcessInfoIOS.h"
+#include "cores/RetroPlayer/process/tvos/RPProcessInfoTVOS.h"
 #include "cores/RetroPlayer/rendering/VideoRenderers/RPRendererOpenGLES.h"
 #include "cores/VideoPlayer/DVDCodecs/DVDFactoryCodec.h"
 #include "cores/VideoPlayer/DVDCodecs/Video/VTB.h"
-#include "cores/VideoPlayer/Process/ios/ProcessInfoIOS.h"
+#include "cores/VideoPlayer/Process/tvos/ProcessInfoTVOS.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
 #include "cores/VideoPlayer/VideoRenderers/HwDecRender/RendererVTBGLES.h"
@@ -190,18 +190,16 @@ bool CWinSystemTVOS::CreateNewWindow(const std::string& name, bool fullScreen, R
   m_eglext += " ";
 
   CLog::Log(LOGDEBUG, "EGL_EXTENSIONS:%s", m_eglext.c_str());
-    
- /*
+
   // register platform dependent objects
   CDVDFactoryCodec::ClearHWAccels();
   VTB::CDecoder::Register();
   VIDEOPLAYER::CRendererFactory::ClearRenderer();
   CLinuxRendererGLES::Register();
   CRendererVTB::Register();
-  VIDEOPLAYER::CProcessInfoIOS::Register();
-  RETRO::CRPProcessInfoIOS::Register();
-  RETRO::CRPProcessInfoIOS::RegisterRendererFactory(new RETRO::CRendererFactoryOpenGLES);
-  */
+  VIDEOPLAYER::CProcessInfoTVOS::Register();
+  RETRO::CRPProcessInfoTVOS::Register();
+  RETRO::CRPProcessInfoTVOS::RegisterRendererFactory(new RETRO::CRendererFactoryOpenGLES);
 
   return true;
 }

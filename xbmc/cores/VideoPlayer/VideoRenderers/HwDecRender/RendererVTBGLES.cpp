@@ -14,8 +14,14 @@
 #include "utils/GLUtils.h"
 #include "cores/VideoPlayer/DVDCodecs/Video/VTB.h"
 #include "settings/MediaSettings.h"
+#if defined(TARGET_DARWIN_IOS)
 #include "windowing/osx/WinSystemIOS.h"
-#include "platform/darwin/DarwinUtils.h"
+#define WIN_SYSTEM_CLASS CWinSystemIOS
+#elif defined(TARGET_DARWIN_TVOS)
+#include "windowing/osx/WinSystemTVOS.h"
+#define WIN_SYSTEM_CLASS CWinSystemTVOS
+#endif
+
 #include <CoreVideo/CVBuffer.h>
 #include <CoreVideo/CVPixelBuffer.h>
 #include <OpenGLES/ES2/glext.h>
@@ -38,7 +44,7 @@ bool CRendererVTB::Register()
 CRendererVTB::CRendererVTB()
 {
   m_textureCache = nullptr;
-  CWinSystemIOS* winSystem = dynamic_cast<CWinSystemIOS*>(CServiceBroker::GetWinSystem());
+  WIN_SYSTEM_CLASS *winSystem = dynamic_cast<WIN_SYSTEM_CLASS *>(CServiceBroker::GetWinSystem());
   m_glContext = winSystem->GetEAGLContextObj();
   CVReturn ret = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault,
                                               NULL,
@@ -93,16 +99,9 @@ EShaderFormat CRendererVTB::GetShaderFormat()
 
 bool CRendererVTB::LoadShadersHook()
 {
-  float ios_version = CDarwinUtils::GetIOSVersion();
   CLog::Log(LOGNOTICE, "GL: Using CVBREF render method");
   m_textureTarget = GL_TEXTURE_2D;
   m_renderMethod = RENDER_CUSTOM;
-
-  if (ios_version < 5.0)
-  {
-    CLog::Log(LOGNOTICE, "GL: ios version < 5 is not supported");
-    return false;
-  }
 
   if (!m_textureCache)
   {
