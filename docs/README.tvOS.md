@@ -200,9 +200,11 @@ make -j$(getconf _NPROCESSORS_ONLN) -C build
 CMake generates a target called `deb` which will package Kodi ready for distribution. After Kodi has been built, the target can be triggered by selecting it in Xcode active scheme or manually running
 
 ```
-cd $HOME/kodi-build/build
+cd $HOME/kodi-build
 /Users/Shared/xbmc-depends/x86_64-darwin18.5.0-native/bin/cmake --build . --target "deb" --config "Debug"
 ```
+
+The generated package will be located at $HOME/kodi-build/tools/darwin/packaging/tvos.
 
 Alternatively, if you built using makefiles issue:
 ```
