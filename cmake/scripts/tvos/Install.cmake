@@ -1,26 +1,12 @@
 # TVOS packaging
 
-set(BUNDLE_RESOURCES ${CMAKE_SOURCE_DIR}/xbmc/platform/darwin/tvos/Assets.xcassets/LaunchImage.launchimage/Splash@2x.png
-                     ${CMAKE_SOURCE_DIR}/xbmc/platform/darwin/tvos/Assets.xcassets/LaunchImage.launchimage/Splash.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon29x29.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon29x29@2x.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon40x40.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon40x40@2x.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon50x50.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon50x50@2x.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon57x57.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon57x57@2x.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon60x60.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon60x60@2x.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon72x72.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon72x72@2x.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon76x76.png
-                     ${CMAKE_SOURCE_DIR}/tools/darwin/packaging/media/tvos/rounded/AppIcon76x76@2x.png)
-
-target_sources(${APP_NAME_LC} PRIVATE ${BUNDLE_RESOURCES})
-foreach(file IN LISTS BUNDLE_RESOURCES)
-  set_source_files_properties(${file} PROPERTIES MACOSX_PACKAGE_LOCATION .)
-endforeach()
+# asset catalog
+set(ASSET_CATALOG "${CMAKE_SOURCE_DIR}/xbmc/platform/darwin/tvos/Assets.xcassets")
+execute_process(COMMAND ${CMAKE_SOURCE_DIR}/tools/darwin/Support/GenerateMissingImages-tvos.py "${ASSET_CATALOG}")
+target_sources(${APP_NAME_LC} PRIVATE "${ASSET_CATALOG}")
+set_source_files_properties("${ASSET_CATALOG}" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources") # adds to Copy Bundle Resources build phase
+set_target_properties(${APP_NAME_LC} PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "Brand Assets"
+                                                XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME "LaunchImage")
 
 target_sources(${APP_NAME_LC} PRIVATE ${CMAKE_SOURCE_DIR}/xbmc/platform/darwin/tvos/English.lproj/InfoPlist.strings)
 set_source_files_properties(${CMAKE_SOURCE_DIR}/xbmc/platform/darwin/tvos/English.lproj/InfoPlist.strings PROPERTIES MACOSX_PACKAGE_LOCATION "./English.lproj")
