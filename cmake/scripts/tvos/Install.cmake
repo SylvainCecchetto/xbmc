@@ -8,9 +8,6 @@ set_source_files_properties("${ASSET_CATALOG}" PROPERTIES MACOSX_PACKAGE_LOCATIO
 set_target_properties(${APP_NAME_LC} PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "Brand Assets"
                                                 XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME "LaunchImage")
 
-target_sources(${APP_NAME_LC} PRIVATE ${CMAKE_SOURCE_DIR}/xbmc/platform/darwin/tvos/English.lproj/InfoPlist.strings)
-set_source_files_properties(${CMAKE_SOURCE_DIR}/xbmc/platform/darwin/tvos/English.lproj/InfoPlist.strings PROPERTIES MACOSX_PACKAGE_LOCATION "./English.lproj")
-
 # Options for code signing propagated as env vars to Codesign.command via Xcode
 set(TVOS_CODE_SIGN_IDENTITY "" CACHE STRING "Code Sign Identity")
 if(TVOS_CODE_SIGN_IDENTITY)
