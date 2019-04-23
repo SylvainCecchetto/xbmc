@@ -3,18 +3,18 @@
     {
       "orientation" : "landscape",
       "idiom" : "tv",
-      "filename" : "Splash@2x.png",
+      "filename" : "splash.jpg",
       "extent" : "full-screen",
-      "minimum-system-version" : "11.0",
-      "scale" : "2x"
+      "minimum-system-version" : "9.0",
+      "scale" : "1x"
     },
     {
       "orientation" : "landscape",
       "idiom" : "tv",
-      "filename" : "Splash.png",
+      "filename" : "splash@2x.jpg",
       "extent" : "full-screen",
-      "minimum-system-version" : "9.0",
-      "scale" : "1x"
+      "minimum-system-version" : "11.0",
+      "scale" : "2x"
     }
   ],
   "info" : {
