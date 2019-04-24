@@ -251,7 +251,7 @@
 		<integer>2</integer>
 	</array>
 	<key>CFBundleIdentifier</key>
-	<string>org.xbmc.@APP_NAME_LC@-ios</string>
+	<string>@PLATFORM_BUNDLE_IDENTIFIER@</string>
 	<key>DTXcode</key>
 	<string>0730</string>
 	<key>CFBundleExecutable</key>

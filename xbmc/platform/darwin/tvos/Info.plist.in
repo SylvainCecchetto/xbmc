@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>@APP_NAME_LC@</string>
 	<key>CFBundleIdentifier</key>
-	<string>@APP_PACKAGE@-tvos</string>
+	<string>@PLATFORM_BUNDLE_IDENTIFIER@</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -24,7 +24,7 @@
 	<array>
 	<dict>
 		<key>CFBundleURLName</key>
-		<string>@APP_PACKAGE@-tvos</string>
+		<string>@PLATFORM_BUNDLE_IDENTIFIER@</string>
 		<key>CFBundleURLSchemes</key>
 		<array>
 			<string>kodi</string>
