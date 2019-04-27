@@ -91,7 +91,7 @@ else
 fi
 echo "Priority: Extra"                            >> $DIRNAME/$PACKAGE/DEBIAN/control
 if [ "@PLATFORM@" == "appletvos" ]; then
-  echo "Depends: firmware (>= @CMAKE_XCODE_ATTRIBUTE_TVOS_DEPLOYMENT_TARGET@)" >> $DIRNAME/$PACKAGE/DEBIAN/
+  echo "Depends: firmware (>= @CMAKE_XCODE_ATTRIBUTE_TVOS_DEPLOYMENT_TARGET@)" >> $DIRNAME/$PACKAGE/DEBIAN/control
 else
   echo "Depends: firmware (>= @CMAKE_XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET@)"                 >> $DIRNAME/$PACKAGE/DEBIAN/control
 fi
