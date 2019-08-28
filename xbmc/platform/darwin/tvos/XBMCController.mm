@@ -371,6 +371,7 @@ XBMCController* g_xbmcController;
     //  a) if at our home view, should return to atv home screen.
     //  b) if not, let it pass to us.
     if (CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() == WINDOW_HOME &&
+        !CServiceBroker::GetGUI()->GetWindowManager().HasVisibleModalDialog() &&
         !g_application.GetAppPlayer().IsPlaying())
       handled = NO;
     break;
