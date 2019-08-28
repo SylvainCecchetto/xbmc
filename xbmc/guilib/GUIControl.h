@@ -28,7 +28,7 @@ class CMouseEvent;
 class CGUIMessage;
 class CGUIAction;
 
-enum ORIENTATION { HORIZONTAL = 0, VERTICAL };
+enum ORIENTATION { HORIZONTAL = 0, VERTICAL, UNDEFINED };
 
 class CControlState
 {
@@ -173,6 +173,7 @@ public:
   virtual float GetYPosition() const;
   virtual float GetWidth() const;
   virtual float GetHeight() const;
+  virtual ORIENTATION GetOrientation() const;
 
   void MarkDirtyRegion(const unsigned int dirtyState = DIRTY_STATE_CONTROL);
   bool IsControlDirty() const { return m_controlDirtyState != 0; };
@@ -228,6 +229,9 @@ public:
   const std::vector<CAnimation> &GetAnimations() const { return m_animations; };
 
   virtual void QueueAnimation(ANIMATION_TYPE anim);
+  virtual bool IsFading();
+  virtual bool IsSliding();
+  virtual bool IsScrolling() const;
   virtual bool IsAnimating(ANIMATION_TYPE anim);
   virtual bool HasAnimation(ANIMATION_TYPE anim);
   CAnimation *GetAnimation(ANIMATION_TYPE type, bool checkConditions = true);
@@ -331,6 +335,7 @@ protected:
   float m_posY;
   float m_height;
   float m_width;
+  ORIENTATION m_orientation;
   CRect m_hitRect;
   UTILS::Color m_hitColor = 0xffffffff;
   KODI::GUILIB::GUIINFO::CGUIInfoColor m_diffuseColor;

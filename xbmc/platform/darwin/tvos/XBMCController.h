@@ -17,6 +17,26 @@ typedef enum
   IOS_PLAYBACK_PLAYING
 } IOSPlaybackState;
 
+typedef enum
+{
+  MC_NONE = 0,
+  MC_ACTIVE,
+  MC_INACTIVE,
+  MC_INACTIVE_ISPAUSED,   // player was in pause state
+  MC_INACTIVE_WASPAUSED,  // player was playing and we paused it
+  MC_BACKGROUND,
+  MC_BACKGROUND_RESTORE,
+} MC_STATES;
+
+typedef enum
+{
+  TOUCH_UP = 0,
+  TOUCH_DOWN,
+  TOUCH_LEFT,
+  TOUCH_RIGHT,
+  TOUCH_CENTER
+} TOUCH_POSITION;
+
 typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection) {
   UIPanGestureRecognizerDirectionUndefined,
   UIPanGestureRecognizerDirectionUp,
@@ -48,9 +68,12 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection) {
   BOOL m_pause;
   BOOL m_appAlive;
   BOOL m_animating;
+  MC_STATES m_controllerState;
   BOOL m_disableIdleTimer;
   NSConditionLock* m_animationThreadLock;
   NSThread* m_animationThread;
+  BOOL m_enableRemoteExpertMode;
+  BOOL m_stopPlaybackOnMenu;
   BOOL m_directionOverride;
   BOOL m_mimicAppleSiri;
   XBMCKey m_currentKey;
@@ -59,19 +82,28 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection) {
   CGFloat m_remoteIdleTimeout;
   BOOL m_shouldRemoteIdle;
   BOOL m_RemoteOSDSwipes;
+  BOOL m_focusIdleState;
+  TOUCH_POSITION m_touchPosition;
   unsigned long m_touchDirection;
   bool m_touchBeginSignaled;
   UIPanGestureRecognizerDirection m_direction;
 }
 // why are these properties ?
-@property(nonatomic, strong) NSTimer* m_holdTimer;
+@property(nonatomic, strong) NSTimer* m_selectHoldTimer;
+@property (nonatomic, strong) NSTimer *m_irArrowHoldTimer;
 @property(nonatomic, retain) NSDictionary* m_nowPlayingInfo;
-@property int m_holdCounter;
+@property (nonatomic, strong) NSTimer *m_osdSettingsAutoHideTimer;
+@property int m_selectHoldCounter;
+@property int m_irArrowHoldCounter;
 @property CGPoint m_lastGesturePoint;
 @property CGFloat m_screenScale;
 @property XBMCKey m_currentKey;
 @property int m_screenIdx;
 @property CGSize m_screensize;
+@property BOOL m_focusIdleState;
+@property CGFloat m_focusIdleTimeout;
+@property BOOL m_enableRemoteExpertMode;
+@property BOOL m_stopPlaybackOnMenu;
 @property BOOL m_directionOverride;
 @property BOOL m_mimicAppleSiri;
 @property BOOL m_clickResetPan;
@@ -82,6 +114,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection) {
 @property unsigned long m_touchDirection;
 @property bool m_touchBeginSignaled;
 @property UIPanGestureRecognizerDirection m_direction;
+@property TOUCH_POSITION m_touchPosition;
 
 - (void)pauseAnimation;
 - (void)resumeAnimation;

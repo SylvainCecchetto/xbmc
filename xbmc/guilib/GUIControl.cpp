@@ -57,6 +57,7 @@ CGUIControl::CGUIControl(int parentID, int controlID, float posX, float posY, fl
   m_posY = posY;
   m_width = width;
   m_height = height;
+  m_orientation = UNDEFINED;
   m_bHasFocus = false;
   m_controlID = controlID;
   m_parentID = parentID;
@@ -467,6 +468,11 @@ float CGUIControl::GetHeight() const
   return m_height;
 }
 
+ORIENTATION CGUIControl::GetOrientation () const
+{
+  return m_orientation;
+}
+
 void CGUIControl::MarkDirtyRegion(const unsigned int dirtyState)
 {
   if (!m_controlDirtyState && m_parentControl)
@@ -855,6 +861,31 @@ bool CGUIControl::Animate(unsigned int currentTime)
   }
 
   return changed;
+}
+
+bool CGUIControl::IsFading()
+{
+  for (size_t i = 0; i < m_animations.size(); i++)
+  {
+    if (m_animations[i].IsFading())
+      return true;
+  }
+  return false;
+}
+
+bool CGUIControl::IsSliding()
+{
+  for (size_t i = 0; i < m_animations.size(); i++)
+  {
+    if (m_animations[i].IsSliding())
+      return true;
+  }
+  return false;
+}
+
+bool CGUIControl::IsScrolling() const
+{
+  return false;
 }
 
 bool CGUIControl::IsAnimating(ANIMATION_TYPE animType)

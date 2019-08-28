@@ -2,6 +2,7 @@ set(SOURCES DDSImage.cpp
             DirtyRegionSolvers.cpp
             DirtyRegionTracker.cpp
             FFmpegImage.cpp
+            FocusabilityTracker.cpp
             GUIAction.cpp
             GUIAudioManager.cpp
             GUIBaseContainer.cpp
@@ -76,6 +77,7 @@ set(HEADERS DDSImage.h
             DirtyRegionTracker.h
             DispResource.h
             FFmpegImage.h
+            FocusabilityTracker.h
             gui3d.h
             GUIAction.h
             GUIAudioManager.h
