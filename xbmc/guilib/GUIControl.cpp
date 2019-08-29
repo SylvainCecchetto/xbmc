@@ -481,6 +481,24 @@ void CGUIControl::MarkDirtyRegion(const unsigned int dirtyState)
   m_controlDirtyState |= dirtyState;
 }
 
+bool CGUIControl::HasFocusVisibility()
+{
+  bool focusvisible = false;
+  if (CanFocus() && IsVisibleFromSkin())
+  {
+    focusvisible = true;
+    if (m_visibleCondition)
+      focusvisible = m_visibleCondition->Get();
+  }
+  return focusvisible;
+}
+
+void CGUIControl::AppendFocusableTracker(CGUIControl *view)
+{
+  if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
+    CServiceBroker::GetGUI()->GetWindowManager().AppendFocusableTracker(this, view);
+}
+
 CRect CGUIControl::CalcRenderRegion() const
 {
   CPoint tl(GetXPosition(), GetYPosition());

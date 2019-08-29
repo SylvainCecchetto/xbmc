@@ -176,6 +176,8 @@ public:
   virtual ORIENTATION GetOrientation() const;
 
   void MarkDirtyRegion(const unsigned int dirtyState = DIRTY_STATE_CONTROL);
+  virtual bool HasFocusVisibility();
+  void AppendFocusableTracker(CGUIControl *view = nullptr);
   bool IsControlDirty() const { return m_controlDirtyState != 0; };
 
   /*! \brief return the render region in screen coordinates of this control

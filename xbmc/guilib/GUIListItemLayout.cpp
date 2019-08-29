@@ -78,6 +78,7 @@ void CGUIListItemLayout::Process(CGUIListItem *item, int parentID, unsigned int 
 void CGUIListItemLayout::Render(CGUIListItem *item, int parentID)
 {
   m_group.DoRender();
+  m_group.AppendFocusableTracker();
 }
 
 void CGUIListItemLayout::SetFocusedItem(unsigned int focus)

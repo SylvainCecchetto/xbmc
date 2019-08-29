@@ -405,6 +405,7 @@ void CGUIWindowFullScreen::Render()
   g_application.GetAppPlayer().Render(true, 255);
   CServiceBroker::GetWinSystem()->GetGfxContext().SetRenderingResolution(m_coordsRes, m_needsScaling);
   CGUIWindow::Render();
+  AppendFocusableTracker(this);
 }
 
 void CGUIWindowFullScreen::RenderEx()

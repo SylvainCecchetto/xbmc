@@ -285,6 +285,33 @@ XBMCController* g_xbmcController;
 }
 
 //--------------------------------------------------------------
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+  
+  // safe time to update screensize, loadView is too early
+  m_screensize.width  = m_glView.bounds.size.width  * m_screenScale;
+  m_screensize.height = m_glView.bounds.size.height * m_screenScale;
+  
+  [self createSiriPressGesturecognizers];
+  [self createSiriSwipeGestureRecognizers];
+  [self createSiriPanGestureRecognizers];
+  [self createSiriTapGestureRecognizers];
+  //FIXME: [self createCustomControlCenter];
+  [self initGameController];
+  
+  if (__builtin_available(tvOS 11.2, *))
+  {
+    if ([m_window respondsToSelector:@selector(avDisplayManager)])
+    {
+      auto avDisplayManager = [m_window avDisplayManager];
+      [avDisplayManager addObserver:self forKeyPath:@"displayModeSwitchInProgress" options:NSKeyValueObservingOptionNew context:nullptr];
+    }
+  }
+  //g_application.SetVolume(100, true);
+}
+
+//--------------------------------------------------------------
 - (void)viewWillAppear:(BOOL)animated
 {
   [self resumeAnimation];
@@ -469,6 +496,17 @@ XBMCController* g_xbmcController;
 }
 
 //--------------------------------------------------------------
+- (void)enterForeground
+{
+  // stop background task (if running)
+  [self disableBackGroundTask];
+  
+  [NSThread detachNewThreadSelector:@selector(enterForegroundDelayed:)
+                           toTarget:self
+                         withObject:nil];
+}
+
+//--------------------------------------------------------------
 - (void)enterBackground
 {
   // We have 5 seconds before the OS will force kill us for delaying too long.
@@ -544,17 +582,6 @@ XBMCController* g_xbmcController;
   // this handles what to do if we got pushed
   // into foreground by a topshelf item select/play
   CTVOSTopShelf::GetInstance().RunTopShelf();
-}
-
-//--------------------------------------------------------------
-- (void)enterForeground
-{
-  // stop background task (if running)
-  [self disableBackGroundTask];
-  
-  [NSThread detachNewThreadSelector:@selector(enterForegroundDelayed:)
-                           toTarget:self
-                         withObject:nil];
 }
 
 //--------------------------------------------------------------

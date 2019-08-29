@@ -1537,6 +1537,8 @@ void CApplication::Render()
   CServiceBroker::GetGUI()->GetWindowManager().RenderEx();
 
   CServiceBroker::GetRenderSystem()->EndRender();
+  
+  CServiceBroker::GetGUI()->GetWindowManager().RenderingFinished();
 
   // reset our info cache - we do this at the end of Render so that it is
   // fresh for the next process(), or after a windowclose animation (where process()
