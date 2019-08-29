@@ -28,7 +28,7 @@ class CMouseEvent;
 class CGUIMessage;
 class CGUIAction;
 
-enum ORIENTATION { HORIZONTAL = 0, VERTICAL };
+enum ORIENTATION { HORIZONTAL = 0, VERTICAL, UNDEFINED };
 
 class CControlState
 {
@@ -164,6 +164,8 @@ public:
   bool IsVisibleFromSkin() const { return m_visibleFromSkinCondition; };
   virtual bool IsDisabled() const;
   virtual void SetPosition(float posX, float posY);
+  virtual const CRect GetRenderRect();
+  virtual const CRect GetSelectionRenderRect();
   virtual void SetHitRect(const CRect &rect, const UTILS::Color &color);
   virtual void SetCamera(const CPoint &camera);
   virtual void SetStereoFactor(const float &factor);
@@ -173,8 +175,11 @@ public:
   virtual float GetYPosition() const;
   virtual float GetWidth() const;
   virtual float GetHeight() const;
+  virtual ORIENTATION GetOrientation() const;
 
   void MarkDirtyRegion(const unsigned int dirtyState = DIRTY_STATE_CONTROL);
+  virtual bool HasFocusVisibility();
+  void AppendFocusableTracker(CGUIControl *view = nullptr);
   bool IsControlDirty() const { return m_controlDirtyState != 0; };
 
   /*! \brief return the render region in screen coordinates of this control
@@ -226,11 +231,17 @@ public:
 
   void SetAnimations(const std::vector<CAnimation> &animations);
   const std::vector<CAnimation> &GetAnimations() const { return m_animations; };
+  const std::vector<CAnimation> &GetDynamicAnimations() const { return m_dynamicAnimations; };
 
   virtual void QueueAnimation(ANIMATION_TYPE anim);
+  virtual bool IsFading();
+  virtual bool IsSliding();
+  virtual bool IsScrolling() const;
   virtual bool IsAnimating(ANIMATION_TYPE anim);
   virtual bool HasAnimation(ANIMATION_TYPE anim);
   CAnimation *GetAnimation(ANIMATION_TYPE type, bool checkConditions = true);
+  void SetDynamicAnimations(const std::vector<CAnimation> &animations);
+  void ClearDynamicAnimations();
   virtual void ResetAnimation(ANIMATION_TYPE type);
   virtual void ResetAnimations();
 
@@ -331,6 +342,7 @@ protected:
   float m_posY;
   float m_height;
   float m_width;
+  ORIENTATION m_orientation;
   CRect m_hitRect;
   UTILS::Color m_hitColor = 0xffffffff;
   KODI::GUILIB::GUIINFO::CGUIInfoColor m_diffuseColor;
@@ -360,6 +372,7 @@ protected:
 
   // animation effects
   std::vector<CAnimation> m_animations;
+  std::vector<CAnimation> m_dynamicAnimations;
   CPoint m_camera;
   bool m_hasCamera;
   float m_stereo;

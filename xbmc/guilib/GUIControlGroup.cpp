@@ -115,6 +115,8 @@ void CGUIControlGroup::Render()
   if (focusedControl)
     focusedControl->DoRender();
   CGUIControl::Render();
+  if (HasFocusVisibility())
+    CGUIControl::AppendFocusableTracker(this);
   CServiceBroker::GetWinSystem()->GetGfxContext().RestoreOrigin();
 }
 
@@ -279,6 +281,18 @@ bool CGUIControlGroup::CanFocus() const
   for (auto *control : m_children)
   {
     if (control->CanFocus())
+      return true;
+  }
+  return false;
+}
+
+bool CGUIControlGroup::HasFocusVisibility()
+{
+  if (!CGUIControl::HasFocusVisibility()) return false;
+  // see if we have any children that can be focused
+  for (auto it = m_children.begin(); it != m_children.end(); ++it)
+  {
+    if ((*it)->HasFocusVisibility())
       return true;
   }
   return false;

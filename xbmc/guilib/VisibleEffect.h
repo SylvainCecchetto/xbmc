@@ -34,7 +34,8 @@ enum ANIMATION_TYPE
   ANIM_TYPE_WINDOW_OPEN,
   ANIM_TYPE_VISIBLE,
   ANIM_TYPE_FOCUS,
-  ANIM_TYPE_CONDITIONAL       // for animations triggered by a condition change
+  ANIM_TYPE_CONDITIONAL,       // for animations triggered by a condition change
+  ANIM_TYPE_DYNAMIC
 };
 
 class CAnimEffect
@@ -52,6 +53,7 @@ public:
   void Calculate(unsigned int time, const CPoint &center);
   void ApplyState(ANIMATION_STATE state, const CPoint &center);
 
+  bool IsActive() const { return m_active; };
   unsigned int GetDelay() const { return m_delay; };
   unsigned int GetLength() const { return m_delay + m_length; };
   const TransformMatrix &GetTransform() const { return m_matrix; };
@@ -68,6 +70,7 @@ private:
   // timing variables
   unsigned int m_length;
   unsigned int m_delay;
+  bool m_active = false;
 
   std::shared_ptr<Tweener> m_pTweener;
 };
@@ -155,6 +158,8 @@ public:
   void RenderAnimation(TransformMatrix &matrix, const CPoint &center);
   void QueueAnimation(ANIMATION_PROCESS process);
 
+  inline bool IsFading() const { return m_fading; };
+  inline bool IsSliding() const { return m_sliding; };
   inline bool IsReversible() const { return m_reversible; };
   inline ANIMATION_TYPE GetType() const { return m_type; };
   inline ANIMATION_STATE GetState() const { return m_currentState; };
@@ -191,6 +196,8 @@ private:
   unsigned int m_delay;
   unsigned int m_amount;
 
+  bool m_fading = false;
+  bool m_sliding = false;
   std::vector<CAnimEffect *> m_effects;
 };
 

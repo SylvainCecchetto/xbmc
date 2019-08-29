@@ -13,6 +13,7 @@
 #include "IMsgTargetCallback.h"
 #include "IWindowManagerCallback.h"
 #include "guilib/WindowIDs.h"
+#include "guilib/FocusabilityTracker.h"
 #include "messaging/IMessageTarget.h"
 
 #include <list>
@@ -98,10 +99,16 @@ public:
   bool Render();
 
   void RenderEx() const;
+  
+  void BeginRender();
 
   /*! \brief Do any post render activities.
    */
   void AfterRender();
+  
+  /*! \brief Do any activities after all rendering is finished (Render/RenderEx/AfterRender)
+   */
+  void RenderingFinished();
 
   /*! \brief Per-frame updating of the current window and any dialogs
    FrameMove is called every frame to update the current window and any dialogs
@@ -166,6 +173,11 @@ public:
   void RegisterDialog(CGUIWindow* dialog);
   void RemoveDialog(int id);
 
+  void InvalidateFocus(CGUIControl *control);
+  bool FocusableTrackerIsEnabled();
+  void FocusableTrackerSetEnabled(bool enablel);
+  void AppendFocusableTracker(CGUIControl *control, CGUIControl *view = nullptr);
+  
   /*! \brief Get the ID of the topmost dialog
    *
    * \param ignoreClosing ignore dialog is closing
@@ -210,12 +222,14 @@ public:
   bool IsPythonWindow(int id) const { return (id >= WINDOW_PYTHON_START && id <= WINDOW_PYTHON_END); };
 
   bool HasVisibleControls();
+  
+  CFocusabilityTracker m_focusableTracker;
 
 #ifdef _DEBUG
   void DumpTextureUse();
 #endif
 private:
-  void RenderPass() const;
+  void RenderPass();
 
   void LoadNotOnDemandWindows();
   void UnloadNotOnDemandWindows();

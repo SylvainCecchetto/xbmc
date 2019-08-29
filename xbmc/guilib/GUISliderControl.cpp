@@ -157,6 +157,10 @@ void CGUISliderControl::Render()
     nibUpper.Render();
   }
   CGUIControl::Render();
+  
+  // todo: missing background area...
+  if (HasFocusVisibility())
+    CGUIControl::AppendFocusableTracker();
 }
 
 bool CGUISliderControl::OnMessage(CGUIMessage& message)
