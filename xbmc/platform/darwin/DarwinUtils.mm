@@ -18,6 +18,9 @@
   #import <UIKit/UIKit.h>
   #import <mach/mach_host.h>
   #import <sys/sysctl.h>
+  #if defined(TARGET_DARWIN_TVOS)
+    #import "platform/darwin/tvos/XBMCController.h"
+  #endif
 #else
   #import <Cocoa/Cocoa.h>
   #import <CoreFoundation/CoreFoundation.h>
@@ -406,6 +409,13 @@ bool CDarwinUtils::IsIosSandboxed(void)
     }
   });
   return ret;
+}
+
+void CDarwinUtils::UpdateFocusLayerMainThread()
+{
+#if defined(TARGET_DARWIN_TVOS)
+  [g_xbmcController updateFocusLayerMainThread];
+#endif
 }
 
 void CDarwinUtils::SetScheduling(bool realtime)

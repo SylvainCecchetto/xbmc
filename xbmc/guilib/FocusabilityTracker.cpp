@@ -50,6 +50,12 @@ void CFocusabilityTracker::Append(CGUIControl *control, CGUIControl *view)
 {
   if (m_enable)
   {
+    //TEMPO sy6sy2, to be fixed
+    if(view == nullptr || view == NULL)
+    {
+      return;
+    }
+    
     GUIFocusabilityItem item;
     item.control = control;
     item.renderOrder = ++m_renderOrder;

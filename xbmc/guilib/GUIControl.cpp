@@ -99,7 +99,7 @@ void CGUIControl::FreeResources(bool immediately)
     for (unsigned int i = 0; i < m_animations.size(); i++)
     {
       CAnimation &anim = m_animations[i];
-      if (anim.GetType() != ANIM_TYPE_CONDITIONAL)
+      if (anim.GetType() != ANIM_TYPE_CONDITIONAL || anim.GetType() != ANIM_TYPE_DYNAMIC)
         anim.ResetAnimation();
     }
     m_bAllocated=false;
@@ -629,7 +629,14 @@ void CGUIControl::UpdateVisibility(const CGUIListItem *item)
   for (unsigned int i = 0; i < m_animations.size(); i++)
   {
     CAnimation &anim = m_animations[i];
-    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
+      anim.UpdateCondition(item);
+  }
+  // check for conditional dynamic animations
+  for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    CAnimation &anim = m_dynamicAnimations[i];
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
       anim.UpdateCondition(item);
   }
   // and check for conditional enabling - note this overrides SetEnabled() from the code currently
@@ -668,7 +675,14 @@ void CGUIControl::SetInitialVisibility()
   for (unsigned int i = 0; i < m_animations.size(); i++)
   {
     CAnimation &anim = m_animations[i];
-    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
+      anim.SetInitialCondition();
+  }
+  // and handle dynamic animation conditions as well
+  for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    CAnimation &anim = m_dynamicAnimations[i];
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
       anim.SetInitialCondition();
   }
   // and check for conditional enabling - note this overrides SetEnabled() from the code currently
@@ -698,6 +712,19 @@ void CGUIControl::SetAnimations(const std::vector<CAnimation> &animations)
   MarkDirtyRegion();
 }
 
+void CGUIControl::SetDynamicAnimations(const std::vector<CAnimation> &animations)
+{
+  m_dynamicAnimations = animations;
+  MarkDirtyRegion();
+}
+
+void CGUIControl::ClearDynamicAnimations()
+{
+  MarkDirtyRegion();
+  m_dynamicAnimations.clear();
+  MarkDirtyRegion();
+}
+
 void CGUIControl::ResetAnimation(ANIMATION_TYPE type)
 {
   MarkDirtyRegion();
@@ -707,6 +734,11 @@ void CGUIControl::ResetAnimation(ANIMATION_TYPE type)
     if (m_animations[i].GetType() == type)
       m_animations[i].ResetAnimation();
   }
+  for (size_t i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    if (m_dynamicAnimations[i].GetType() == type)
+      m_dynamicAnimations[i].ResetAnimation();
+  }
 }
 
 void CGUIControl::ResetAnimations()
@@ -715,6 +747,9 @@ void CGUIControl::ResetAnimations()
 
   for (unsigned int i = 0; i < m_animations.size(); i++)
     m_animations[i].ResetAnimation();
+  
+  for (size_t i = 0; i < m_dynamicAnimations.size(); i++)
+    m_dynamicAnimations[i].ResetAnimation();
 
   MarkDirtyRegion();
 }
@@ -981,6 +1016,16 @@ void CGUIControl::UpdateControlStats()
     if (IsVisible() && IsVisibleFromSkin())
       ++m_controlStats->nCountVisible;
   }
+}
+
+const CRect CGUIControl::GetRenderRect()
+{
+  return m_renderRegion;
+}
+
+const CRect CGUIControl::GetSelectionRenderRect()
+{
+  return m_renderRegion;
 }
 
 void CGUIControl::SetHitRect(const CRect &rect, const UTILS::Color &color)

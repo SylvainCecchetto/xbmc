@@ -72,8 +72,8 @@ void CFocusEngineHandler::Process()
   {
     if (m_focus.itemFocus)
     {
-      //FIXME: m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
-      //FIXME: m_focus.itemFocus->ClearDynamicAnimations();
+      m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
+      m_focus.itemFocus->ClearDynamicAnimations();
     }
     CSingleLock lock(m_focusLock);
     // itemsVisible will start cleared
@@ -113,8 +113,8 @@ void CFocusEngineHandler::Process()
         anim.Create(&node, rect, 0);
         animations.push_back(anim);
         
-        //FIXME: m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
-        //FIXME: m_focus.itemFocus->SetDynamicAnimations(animations);
+        m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
+        m_focus.itemFocus->SetDynamicAnimations(animations);
         m_focusAnimate = FocusEngineAnimate();
         m_state = FocusEngineState::Idle;
         break;
@@ -181,8 +181,8 @@ void CFocusEngineHandler::Process()
             anim.Create(&node, rect, 0);
             animations.push_back(anim);
           }
-          //FIXME: m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
-          //FIXME: m_focus.itemFocus->SetDynamicAnimations(animations);
+          m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
+          m_focus.itemFocus->SetDynamicAnimations(animations);
         }
         m_state = FocusEngineState::Idle;
       }
@@ -513,7 +513,7 @@ void CFocusEngineHandler::SetGUIFocusabilityItems(const CFocusabilityTracker &fo
   }
   
   // trigger tvOS main thread to rebuild views and focus
-  //FIXME: CDarwinUtils::UpdateFocusLayerMainThread();
+  CDarwinUtils::UpdateFocusLayerMainThread();
 }
 
 void CFocusEngineHandler::UpdateFocusability()
@@ -528,7 +528,7 @@ void CFocusEngineHandler::UpdateFocusability()
     {
       auto &item = *it;
       item.renderRect = item.control->GetRenderRegion();
-        item.viewRenderRect = item.parentView->GetRenderRegion();
+      item.viewRenderRect = item.parentView->GetRenderRegion();
     }
     // qualify items and rather them into views. The enclosing
     // view will be last in draw order.
