@@ -624,7 +624,7 @@ XBMCController* g_xbmcController;
 
 - (void)longPlayPausePressed:(UILongPressGestureRecognizer*)sender
 {
-  NSLog(@"play/pause long press, state: %ld", (long)sender.state);
+  NSLog(@"play/pause long press, state: %ld", static_cast<long>(sender.state));
 }
 
 - (void)doublePlayPausePressed:(UITapGestureRecognizer*)sender
@@ -769,7 +769,7 @@ XBMCController* g_xbmcController;
 {
   if (!m_remoteIdleState)
   {
-    if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
+    if (m_appAlive) //NO GESTURES BEFORE WE ARE UP AND RUNNING
     {
       if (m_mimicAppleSiri)
       {
@@ -1040,7 +1040,7 @@ XBMCController* g_xbmcController;
 {
   if (!m_remoteIdleState)
   {
-    if (!m_mimicAppleSiri && m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
+    if (!m_mimicAppleSiri && m_appAlive) //NO GESTURES BEFORE WE ARE UP AND RUNNING
     {
 #if (NEW_REMOTE_HANDLING)
       switch ([sender direction])
@@ -1060,7 +1060,7 @@ XBMCController* g_xbmcController;
       }
 #endif
     }
-    m_touchDirection = [sender direction];
+    m_touchDirection = sender.direction;
   }
   // start remote idle timer
   [self startRemoteTimer];
@@ -1093,7 +1093,7 @@ XBMCController* g_xbmcController;
   m_bgTask = UIBackgroundTaskInvalid;
 
   m_window = [[UIWindow alloc] initWithFrame:frame];
-  [m_window setRootViewController:self];
+  m_window.rootViewController = self;
   m_window.screen = screen;
   m_window.backgroundColor = [UIColor blackColor];
   // Turn off autoresizing
@@ -1143,7 +1143,7 @@ XBMCController* g_xbmcController;
   {
     if ([m_window respondsToSelector:@selector(avDisplayManager)])
     {
-      auto avDisplayManager = [m_window avDisplayManager];
+      auto avDisplayManager = m_window.avDisplayManager;
       [avDisplayManager addObserver:self
                          forKeyPath:@"displayModeSwitchInProgress"
                             options:NSKeyValueObservingOptionNew
@@ -1174,7 +1174,7 @@ XBMCController* g_xbmcController;
   {
     if ([m_window respondsToSelector:@selector(avDisplayManager)])
     {
-      auto avDisplayManager = [m_window avDisplayManager];
+      auto avDisplayManager = m_window.avDisplayManager;
       [avDisplayManager removeObserver:self forKeyPath:@"displayModeSwitchInProgress"];
     }
   }
@@ -1304,7 +1304,7 @@ XBMCController* g_xbmcController;
 - (UIScreenMode*)preferredScreenMode:(UIScreen*)screen
 {
   // tvOS only support one mode, the current one.
-  return [screen currentMode];
+  return screen.currentMode;
 }
 
 //--------------------------------------------------------------
@@ -1458,7 +1458,7 @@ XBMCController* g_xbmcController;
       // tvOS 11.2 gets released.
       if ([m_window respondsToSelector:@selector(avDisplayManager)])
       {
-        auto avDisplayManager = [m_window avDisplayManager];
+        auto avDisplayManager = m_window.avDisplayManager;
         if (refreshRate > 0.0)
         {
           // initWithRefreshRate is private in 11.2 beta4 but apple
@@ -1523,7 +1523,7 @@ XBMCController* g_xbmcController;
       {
         // setting preferredDisplayCriteria to nil will
         // switch back to tvOS defined user settings
-        auto avDisplayManager = [m_window avDisplayManager];
+        auto avDisplayManager = m_window.avDisplayManager;
         avDisplayManager.preferredDisplayCriteria = nil;
       }
     }
@@ -1547,7 +1547,7 @@ XBMCController* g_xbmcController;
       float refreshRate = self.getDisplayRate;
       if ([m_window respondsToSelector:@selector(avDisplayManager)])
       {
-        auto avDisplayManager = [m_window avDisplayManager];
+        auto avDisplayManager = m_window.avDisplayManager;
         auto displayCriteria = avDisplayManager.preferredDisplayCriteria;
         // preferredDisplayCriteria can be nil, this is NOT an error
         // and just indicates tvOS defined user settings which we cannot see.
@@ -1556,7 +1556,7 @@ XBMCController* g_xbmcController;
           refreshRate = displayCriteria.refreshRate;
           dynamicRange = displayCriteria.videoDynamicRange;
         }
-        if ([avDisplayManager isDisplayModeSwitchInProgress] == YES)
+        if (avDisplayManager.displayModeSwitchInProgress)
         {
           switchState = "YES";
           CWinSystemTVOS* winSystem = dynamic_cast<CWinSystemTVOS*>(CServiceBroker::GetWinSystem());
@@ -1618,7 +1618,7 @@ XBMCController* g_xbmcController;
 //--------------------------------------------------------------
 - (void)startAnimation
 {
-  if (m_animating == NO && [m_glView getCurrentEAGLContext])
+  if (!m_animating && [m_glView getCurrentEAGLContext])
   {
     // kick off an animation thread
     m_animationThreadLock = [[NSConditionLock alloc] initWithCondition:FALSE];
@@ -1632,7 +1632,7 @@ XBMCController* g_xbmcController;
 //--------------------------------------------------------------
 - (void)stopAnimation
 {
-  if (m_animating == NO && [m_glView getCurrentEAGLContext])
+  if (!m_animating && [m_glView getCurrentEAGLContext])
   {
     m_appAlive = FALSE;
     m_animating = FALSE;
@@ -1644,7 +1644,7 @@ XBMCController* g_xbmcController;
     CAnnounceReceiver::GetInstance()->DeInitialize();
 
     // wait for animation thread to die
-    if ([m_animationThread isFinished] == NO)
+    if (!m_animationThread.finished)
       [m_animationThreadLock lockWhenCondition:TRUE];
   }
 }
@@ -1710,7 +1710,7 @@ int KODI_Run(bool renderGUI)
 {
   @autoreleasepool
   {
-    [[NSThread currentThread] setName:@"XBMC_Run"];
+    [NSThread currentThread].name = @"XBMC_Run";
 
     // signal the thread is alive
     NSConditionLock* myLock = arg;
@@ -1812,7 +1812,7 @@ int KODI_Run(bool renderGUI)
 - (void)setIOSNowPlayingInfo:(NSDictionary*)info
 {
   self.m_nowPlayingInfo = info;
-  [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:self.m_nowPlayingInfo];
+  [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = self.m_nowPlayingInfo;
 }
 //--------------------------------------------------------------
 - (void)onPlay:(NSDictionary*)item
@@ -1820,39 +1820,39 @@ int KODI_Run(bool renderGUI)
   // @todo copy-paste from iOS
   NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
 
-  NSString* title = [item objectForKey:@"title"];
+  NSString* title = item[@"title"];
   if (title && title.length > 0)
-    [dict setObject:title forKey:MPMediaItemPropertyTitle];
-  NSString* album = [item objectForKey:@"album"];
+    dict[MPMediaItemPropertyTitle] = title;
+  NSString* album = item[@"album"];
   if (album && album.length > 0)
-    [dict setObject:album forKey:MPMediaItemPropertyAlbumTitle];
-  NSArray* artists = [item objectForKey:@"artist"];
+    dict[MPMediaItemPropertyAlbumTitle] = album;
+  NSArray* artists = item[@"artist"];
   if (artists && artists.count > 0)
-    [dict setObject:[artists componentsJoinedByString:@" "] forKey:MPMediaItemPropertyArtist];
-  NSNumber* track = [item objectForKey:@"track"];
+    dict[MPMediaItemPropertyArtist] = [artists componentsJoinedByString:@" "];
+  NSNumber* track = item[@"track"];
   if (track)
-    [dict setObject:track forKey:MPMediaItemPropertyAlbumTrackNumber];
-  NSNumber* duration = [item objectForKey:@"duration"];
+    dict[MPMediaItemPropertyAlbumTrackNumber] = track;
+  NSNumber* duration = item[@"duration"];
   if (duration)
-    [dict setObject:duration forKey:MPMediaItemPropertyPlaybackDuration];
-  NSArray* genres = [item objectForKey:@"genre"];
+    dict[MPMediaItemPropertyPlaybackDuration] = duration;
+  NSArray* genres = item[@"genre"];
   if (genres && genres.count > 0)
-    [dict setObject:[genres componentsJoinedByString:@" "] forKey:MPMediaItemPropertyGenre];
+    dict[MPMediaItemPropertyGenre] = [genres componentsJoinedByString:@" "];
 
   if (NSClassFromString(@"MPNowPlayingInfoCenter"))
   {
-    NSNumber* elapsed = [item objectForKey:@"elapsed"];
+    NSNumber* elapsed = item[@"elapsed"];
     if (elapsed)
-      [dict setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-    NSNumber* speed = [item objectForKey:@"speed"];
+      dict[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed;
+    NSNumber* speed = item[@"speed"];
     if (speed)
-      [dict setObject:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
-    NSNumber* current = [item objectForKey:@"current"];
+      dict[MPNowPlayingInfoPropertyPlaybackRate] = speed;
+    NSNumber* current = item[@"current"];
     if (current)
-      [dict setObject:current forKey:MPNowPlayingInfoPropertyPlaybackQueueIndex];
-    NSNumber* total = [item objectForKey:@"total"];
+      dict[MPNowPlayingInfoPropertyPlaybackQueueIndex] = current;
+    NSNumber* total = item[@"total"];
     if (total)
-      [dict setObject:total forKey:MPNowPlayingInfoPropertyPlaybackQueueCount];
+      dict[MPNowPlayingInfoPropertyPlaybackQueueCount] = total;
   }
   /*
    other properities can be set:
@@ -1877,12 +1877,12 @@ int KODI_Run(bool renderGUI)
   if (NSClassFromString(@"MPNowPlayingInfoCenter"))
   {
     NSMutableDictionary* info = [self.m_nowPlayingInfo mutableCopy];
-    NSNumber* elapsed = [item objectForKey:@"elapsed"];
+    NSNumber* elapsed = item[@"elapsed"];
     if (elapsed)
-      [info setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-    NSNumber* speed = [item objectForKey:@"speed"];
+      info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed;
+    NSNumber* speed = item[@"speed"];
     if (speed)
-      [info setObject:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
+      info[MPNowPlayingInfoPropertyPlaybackRate] = speed;
 
     [self setIOSNowPlayingInfo:info];
   }
