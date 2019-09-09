@@ -19,29 +19,50 @@
 @implementation XBMCApplicationDelegate
 XBMCController* m_xbmcController;
 
+// Tells the delegate that the app is about to become inactive.
 - (void)applicationWillResignActive:(UIApplication*)application
 {
-  [m_xbmcController pauseAnimation];
+  PRINT_SIGNATURE();
+  
   [m_xbmcController becomeInactive];
 }
 
+// Tells the delegate that the app has become active.
 - (void)applicationDidBecomeActive:(UIApplication*)application
 {
-  [m_xbmcController resumeAnimation];
-  [m_xbmcController enterForeground];
+  PRINT_SIGNATURE();
+  
+  [m_xbmcController becomeActive];
 }
 
+// Tells the delegate that the app is now in the background. (only 5 seconds for us)
 - (void)applicationDidEnterBackground:(UIApplication*)application
 {
+  PRINT_SIGNATURE();
+  
+  /*
   if (application.applicationState == UIApplicationStateBackground)
   {
     // the app is turn into background, not in by screen lock which has app state inactive.
     [m_xbmcController enterBackground];
   }
+   */
+  [m_xbmcController enterBackground];
 }
 
+// Tells the delegate that the app is about to enter the foreground.
+- (void)applicationWillEnterForeground:(UIApplication*)application
+{
+  PRINT_SIGNATURE();
+  
+  [m_xbmcController enterForeground];
+}
+
+// Tells the delegate when the app is about to terminate.
 - (void)applicationWillTerminate:(UIApplication*)application
 {
+  PRINT_SIGNATURE();
+  
   [m_xbmcController stopAnimation];
 }
 

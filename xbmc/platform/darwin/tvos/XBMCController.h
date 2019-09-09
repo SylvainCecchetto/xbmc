@@ -6,6 +6,7 @@
  *  See LICENSES/README.md for more information.
  */
 
+#import "Application.h"
 #import "windowing/XBMC_events.h"
 
 #import <UIKit/UIKit.h>
@@ -40,6 +41,8 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection) {
   int m_currentClick;
 
   bool m_isPlayingBeforeInactive;
+  bool m_isPlayingBeforeBackground;
+  CFileItem m_playingFileItemBeforeBackground;
   UIBackgroundTaskIdentifier m_bgTask;
   IOSPlaybackState m_playbackState;
   NSDictionary* m_nowPlayingInfo;
@@ -91,6 +94,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection) {
 - (void)enterBackground;
 - (void)enterForeground;
 - (void)becomeInactive;
+- (void)becomeActive;
 - (void)setFramebuffer;
 - (bool)presentFramebuffer;
 - (CGSize)getScreenSize;

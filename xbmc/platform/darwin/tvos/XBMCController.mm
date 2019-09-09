@@ -9,7 +9,6 @@
 #import "platform/darwin/tvos/XBMCController.h"
 
 #import "AppParamParser.h"
-#import "Application.h"
 #import "ServiceBroker.h"
 #import "cores/AudioEngine/Interfaces/AE.h"
 #import "guilib/GUIComponent.h"
@@ -1321,31 +1320,32 @@ XBMCController* g_xbmcController;
 {
   return true;
 }
+
 //--------------------------------------------------------------
 - (void)enterBackground
 {
+  PRINT_SIGNATURE();
   // We have 5 seconds before the OS will force kill us for delaying too long.
   XbmcThreads::EndTime timer(4500);
-
-  // this should not be required as we 'should' get becomeInactive before enterBackground
-  if (g_application.GetAppPlayer().IsPlaying() && !g_application.GetAppPlayer().IsPaused())
+  
+  if(m_isPlayingBeforeInactive)
   {
-    m_isPlayingBeforeInactive = YES;
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE_IF_PLAYING);
+    m_isPlayingBeforeBackground = YES;
+    m_playingFileItemBeforeBackground = g_application.CurrentFileItem();
   }
-
+  
   CWinSystemTVOS* winSystem = dynamic_cast<CWinSystemTVOS*>(CServiceBroker::GetWinSystem());
   winSystem->OnAppFocusChange(false);
-
+  
   // Apple says to disable ZeroConfig when moving to background
   //! @todo
   //CNetworkServices::GetInstance().StopZeroconf();
-
+  
   if (m_isPlayingBeforeInactive)
   {
     // if we were playing and have paused, then
     // enable a background task to keep the network alive
-    [self enableBackGroundTask];
+    //[self enableBackGroundTask];
   }
   else
   {
@@ -1353,7 +1353,7 @@ XBMCController* g_xbmcController;
     // close out network shares as we can get fully suspended.
     g_application.CloseNetworkShares();
   }
-
+  
   // OnAppFocusChange triggers an AE suspend.
   // Wait for AE to suspend and delete the audio sink, this allows
   // AudioOutputUnitStop to complete and AVAudioSession to be set inactive.
@@ -1361,61 +1361,91 @@ XBMCController* g_xbmcController;
   // are really waiting here for AE to suspend.
   //! @todo
   /*
-  while (!CAEFactory::IsSuspended() && !timer.IsTimePast())
-    usleep(250*1000);
-     */
+   while (!CAEFactory::IsSuspended() && !timer.IsTimePast())
+   usleep(250*1000);
+   */
 }
 
+//--------------------------------------------------------------
 - (void)enterForegroundDelayed:(id)arg
 {
+  PRINT_SIGNATURE();
   // MCRuntimeLib_Initialized is only true if
   // we were running and got moved to background
   while (!g_application.IsInitialized())
     usleep(50 * 1000);
-
+  
   CWinSystemTVOS* winSystem = dynamic_cast<CWinSystemTVOS*>(CServiceBroker::GetWinSystem());
   winSystem->OnAppFocusChange(true);
-
-  // when we come back, restore playing if we were.
-  if (m_isPlayingBeforeInactive)
-  {
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_UNPAUSE);
-    m_isPlayingBeforeInactive = NO;
-  }
+  
   // restart ZeroConfig (if stopped)
   //! @todo
   //CNetworkServices::GetInstance().StartZeroconf();
-
+  
   // do not update if we are already updating
   if (!(g_application.IsVideoScanning() || g_application.IsMusicScanning()))
     g_application.UpdateLibraries();
-
+  
   // this will fire only if we are already alive and have 'menu'ed out and back
   CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "xbmc", "OnWake");
-
+  
   // this handles what to do if we got pushed
   // into foreground by a topshelf item select/play
   CTVOSTopShelf::GetInstance().RunTopShelf();
 }
-
+  
+//--------------------------------------------------------------
 - (void)enterForeground
 {
+  PRINT_SIGNATURE();
+  
   // stop background task (if running)
   [self disableBackGroundTask];
-
+  
   [NSThread detachNewThreadSelector:@selector(enterForegroundDelayed:)
                            toTarget:self
                          withObject:nil];
+  
 }
 
+//--------------------------------------------------------------
 - (void)becomeInactive
 {
+  PRINT_SIGNATURE();
+  
+  [self pauseAnimation];
   // if we were interrupted, already paused here
   // else if user background us or lock screen, only pause video here, audio keep playing.
   if (g_application.GetAppPlayer().IsPlayingVideo() && !g_application.GetAppPlayer().IsPaused())
   {
+    NSLog(@"A video is playing and not paused");
     m_isPlayingBeforeInactive = YES;
     CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE_IF_PLAYING);
+  }
+}
+  
+  
+//--------------------------------------------------------------
+- (void)becomeActive
+{
+  PRINT_SIGNATURE();
+  
+  [self resumeAnimation];
+  
+  if (m_isPlayingBeforeInactive)
+  {
+    if(m_isPlayingBeforeBackground)
+    {
+      NSLog(@"A video was playing before background, play it");
+      g_application.PlayFile(m_playingFileItemBeforeBackground, g_application.GetCurrentPlayer());
+    }
+    else
+    {
+      NSLog(@"A video was playing before inactive, resume it");
+      CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_UNPAUSE);
+    }
+    m_isPlayingBeforeBackground = NO;
+    m_isPlayingBeforeInactive = NO;
   }
 }
 
@@ -1610,12 +1640,14 @@ XBMCController* g_xbmcController;
   m_pause = TRUE;
   g_application.SetRenderGUI(false);
 }
+
 //--------------------------------------------------------------
 - (void)resumeAnimation
 {
   m_pause = FALSE;
   g_application.SetRenderGUI(true);
 }
+
 //--------------------------------------------------------------
 - (void)startAnimation
 {
@@ -1630,6 +1662,7 @@ XBMCController* g_xbmcController;
     m_animating = TRUE;
   }
 }
+
 //--------------------------------------------------------------
 - (void)stopAnimation
 {
@@ -1650,6 +1683,7 @@ XBMCController* g_xbmcController;
   }
 }
 
+//--------------------------------------------------------------
 int KODI_Run(bool renderGUI)
 {
   int status = -1;
@@ -1818,6 +1852,8 @@ int KODI_Run(bool renderGUI)
 //--------------------------------------------------------------
 - (void)onPlay:(NSDictionary*)item
 {
+  
+  
   // @todo copy-paste from iOS
   NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
 
@@ -1839,6 +1875,17 @@ int KODI_Run(bool renderGUI)
   NSArray* genres = [item objectForKey:@"genre"];
   if (genres && genres.count > 0)
     [dict setObject:[genres componentsJoinedByString:@" "] forKey:MPMediaItemPropertyGenre];
+  
+//  UIImage *image = [item objectForKey:@"thumb"];
+//  if (image)
+//  {
+//    MPMediaItemArtwork *mArt = [[MPMediaItemArtwork alloc] initWithBoundsSize:image.size requestHandler:^UIImage * _Nonnull(CGSize size) { return image;}];
+//    if (mArt)
+//    {
+//      [dict setObject:mArt forKey:MPMediaItemPropertyArtwork];
+//    }
+//  }
+  
 
   if (NSClassFromString(@"MPNowPlayingInfoCenter"))
   {
@@ -1872,6 +1919,7 @@ int KODI_Run(bool renderGUI)
 
   m_playbackState = IOS_PLAYBACK_PLAYING;
 }
+
 //--------------------------------------------------------------
 - (void)OnSpeedChanged:(NSDictionary*)item
 {
@@ -1888,11 +1936,13 @@ int KODI_Run(bool renderGUI)
     [self setIOSNowPlayingInfo:info];
   }
 }
+
 //--------------------------------------------------------------
 - (void)onPause:(NSDictionary*)item
 {
   m_playbackState = IOS_PLAYBACK_PAUSED;
 }
+
 //--------------------------------------------------------------
 - (void)onStop:(NSDictionary*)item
 {
