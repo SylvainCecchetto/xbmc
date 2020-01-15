@@ -21,6 +21,7 @@
 #include "network/Network.h"
 #include "network/NetworkServices.h"
 #include "platform/xbmc.h"
+#include "powermanagement/PowerManager.h"
 #include "pvr/PVRManager.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
@@ -37,6 +38,7 @@
 #import "platform/darwin/tvos/input/LibInputHandler.h"
 #import "platform/darwin/tvos/input/LibInputRemote.h"
 #import "platform/darwin/tvos/input/LibInputTouch.h"
+#include "platform/darwin/tvos/powermanagement/TVOSPowerSyscall.h"
 
 #import <AVKit/AVDisplayManager.h>
 #import <AVKit/UIWindow.h>
@@ -193,48 +195,34 @@ XBMCController* g_xbmcController;
 
 - (void)becomeInactive
 {
-  // if we were interrupted, already paused here
-  // else if user background us or lock screen, only pause video here, audio keep playing.
+  CLog::Log(LOGDEBUG, "%s",  __PRETTY_FUNCTION__);
   if (g_application.GetAppPlayer().IsPlayingVideo() && !g_application.GetAppPlayer().IsPaused())
   {
     m_isPlayingBeforeInactive = YES;
-    m_lastUsedPlayer = g_application.GetAppPlayer().GetCurrentPlayer();
-    m_playingFileItemBeforeBackground =
-        std::make_unique<CFileItem>(g_application.CurrentFileItem());
     CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE_IF_PLAYING);
-    g_application.CurrentFileItem().m_lStartOffset = g_application.GetAppPlayer().GetTime() - 2.50;
   }
+}
+
+- (void)becomeActive
+{
+  CLog::Log(LOGDEBUG, "%s",  __PRETTY_FUNCTION__);
+  if (m_isPlayingBeforeInactive)
+  {
+    CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_UNPAUSE);
+    m_isPlayingBeforeInactive = NO;
+  }
+
+  // this handles what to do if we got pushed
+  // into foreground by a topshelf item select/play
+  CTVOSTopShelf::GetInstance().RunTopShelf();
 }
 
 - (void)enterBackground
 {
+  CLog::Log(LOGDEBUG, "%s",  __PRETTY_FUNCTION__);
   m_bgTask = [self enableBackGroundTask];
   m_bgTaskActive = YES;
-
-  CLog::Log(LOGNOTICE, "%s: Running sleep jobs", __FUNCTION__);
-
-  CWinSystemTVOS* winSystem = dynamic_cast<CWinSystemTVOS*>(CServiceBroker::GetWinSystem());
-  winSystem->OnAppFocusChange(false);
-
-  // Media was paused, Full background shutdown, so stop now.
-  // Only do for PVR? leave regular media paused?
-  if (g_application.GetAppPlayer().IsPaused())
-  {
-    if (CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() == WINDOW_SLIDESHOW ||
-        CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() == WINDOW_FULLSCREEN_VIDEO ||
-        CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() == WINDOW_FULLSCREEN_GAME ||
-        CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() == WINDOW_VISUALISATION)
-      CServiceBroker::GetGUI()->GetWindowManager().PreviousWindow();
-
-    g_application.StopPlaying();
-  }
-
-  CServiceBroker::GetPVRManager().OnSleep();
-  CServiceBroker::GetActiveAE()->Suspend();
-  CServiceBroker::GetNetwork().GetServices().Stop(true);
-
-  //  if (!m_isPlayingBeforeInactive)
-  g_application.CloseNetworkShares();
+  dynamic_cast<CTVOSPowerSyscall*>(CServiceBroker::GetPowerManager().GetPowerSyscall())->SetOnPause();
 
   m_bgTaskActive = NO;
   [self disableBackGroundTask:m_bgTask];
@@ -242,84 +230,17 @@ XBMCController* g_xbmcController;
 
 - (void)enterForeground
 {
+  CLog::Log(LOGDEBUG, "%s",  __PRETTY_FUNCTION__);
   // stop background task (if running)
   if (m_bgTaskActive)
   {
     CLog::Log(LOGDEBUG, "%s: bgTask already running, closing", __PRETTY_FUNCTION__);
     [self disableBackGroundTask:m_bgTask];
   }
-
-  [NSThread detachNewThreadSelector:@selector(enterForegroundDelayed:)
-                           toTarget:self
-                         withObject:nil];
+  if (g_application.IsInitialized())
+  dynamic_cast<CTVOSPowerSyscall*>(CServiceBroker::GetPowerManager().GetPowerSyscall())->SetOnResume();
 }
 
-- (void)enterForegroundDelayed:(id)arg
-{
-
-  __block BOOL appstate = YES;
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive)
-      appstate = NO;
-  });
-
-  if (!appstate)
-    return;
-
-  // g_application.IsInitialized is only true if
-  // we were running and got moved to background
-  while (!g_application.IsInitialized())
-    usleep(50 * 1000);
-
-  CServiceBroker::GetNetwork().WaitForNet();
-  CServiceBroker::GetNetwork().GetServices().Start();
-
-  if (CServiceBroker::GetActiveAE())
-    if (CServiceBroker::GetActiveAE()->IsSuspended())
-      CServiceBroker::GetActiveAE()->Resume();
-
-  CServiceBroker::GetPVRManager().OnWake();
-
-  CWinSystemTVOS* winSystem = dynamic_cast<CWinSystemTVOS*>(CServiceBroker::GetWinSystem());
-  winSystem->OnAppFocusChange(true);
-
-  // when we come back, restore playing if we were.
-  if (m_isPlayingBeforeInactive)
-  {
-    if (m_playingFileItemBeforeBackground->IsLiveTV())
-    {
-      CLog::Log(LOGDEBUG, "%s: Live TV was playing before suspend. Restart channel",
-                __PRETTY_FUNCTION__);
-      // Restart player with lastused FileItem
-      g_application.PlayFile(*m_playingFileItemBeforeBackground, m_lastUsedPlayer, true);
-    }
-    else
-    {
-      if (g_application.GetAppPlayer().IsPaused() && g_application.GetAppPlayer().HasPlayer())
-      {
-        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_UNPAUSE);
-      }
-      else
-      {
-        g_application.PlayFile(*m_playingFileItemBeforeBackground, m_lastUsedPlayer, true);
-      }
-    }
-    m_playingFileItemBeforeBackground = std::make_unique<CFileItem>();
-    m_lastUsedPlayer = "";
-    m_isPlayingBeforeInactive = NO;
-  }
-
-  // do not update if we are already updating
-  if (!(g_application.IsVideoScanning() || g_application.IsMusicScanning()))
-    g_application.UpdateLibraries();
-
-  // this will fire only if we are already alive and have 'menu'ed out and back
-  CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "xbmc", "OnWake");
-
-  // this handles what to do if we got pushed
-  // into foreground by a topshelf item select/play
-  CTVOSTopShelf::GetInstance().RunTopShelf();
-}
 
 #pragma mark - ScreenSaver Idletimer
 

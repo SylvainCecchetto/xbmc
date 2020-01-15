@@ -49,6 +49,7 @@ class CFileItem;
 - (void)enterBackground;
 - (void)enterForeground;
 - (void)becomeInactive;
+- (void)becomeActive;
 - (void)setFramebuffer;
 - (bool)presentFramebuffer;
 - (void)activateKeyboard:(UIView*)view;
