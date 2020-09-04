@@ -35,6 +35,31 @@
 
 - (NSArray<TVContentItem*>*)topShelfItems
 {
+  
+  auto wrapperIdentifier = [[TVContentIdentifier alloc] initWithIdentifier:@"shelf-wrapper"
+                                                                        container:nil];
+  
+  auto identifier = [[TVContentIdentifier alloc] initWithIdentifier:@"VOD"
+                                                                 container:wrapperIdentifier];
+  auto contentItem = [[TVContentItem alloc] initWithContentIdentifier:identifier];
+
+  contentItem.imageShape = TVContentItemImageShapePoster;
+  contentItem.title = @"Hello world item";
+  
+  NSMutableArray<TVContentItem*>* contentItems =
+  [[NSMutableArray alloc] initWithCapacity:1];
+  [contentItems addObject:contentItem];
+  
+  auto categoryContent = [[TVContentItem alloc] initWithContentIdentifier:wrapperIdentifier];
+  categoryContent.title = @"Hello world category";
+  categoryContent.topShelfItems = contentItems;
+  
+  auto topShelfItems = [[NSMutableArray alloc] init];
+  [topShelfItems addObject:categoryContent];
+
+  return topShelfItems;
+  
+  /*
   // Retrieve store URL
   auto storeUrl = [tvosShared getSharedURL];
   if (!storeUrl)
@@ -118,6 +143,7 @@
   }];
 
   return topShelfItems;
+   */
 }
 
 @end
