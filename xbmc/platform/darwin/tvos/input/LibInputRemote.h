@@ -12,14 +12,14 @@
 @interface TVOSLibInputRemote : NSObject
 {
   NSTimer* m_pressAutoRepeatTimer;
-  NSTimer* m_remoteIdleTimer;
+  NSTimer* m_siriRemoteIdleTimer;
 }
 
-@property(nonatomic) BOOL remoteIdleState;
+@property(nonatomic) BOOL siriRemoteIdleState;
 
-- (void)startRemoteTimer;
-- (void)stopRemoteTimer;
-- (void)setRemoteIdleState;
+- (void)startSiriRemoteIdleTimer;
+- (void)stoptSiriRemoteIdleTimer;
+- (void)setSiriRemoteIdleState;
 - (void)startKeyPressTimer:(int)keyId;
 - (void)startKeyPressTimer:(int)keyId clickTime:(NSTimeInterval)interval;
 - (void)stopKeyPressTimer;
