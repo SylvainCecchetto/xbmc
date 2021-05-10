@@ -16,9 +16,10 @@
 
 @implementation TVOSLibInputSettings
 
-@synthesize siriRemotePanEnabled = m_siriRemotePanEnabled;
 @synthesize siriRemoteIdleTimer = m_siriRemoteIdleTimer;
 @synthesize siriRemoteIdleTime = m_siriRemoteIdleTime;
+@synthesize siriRemoteHorizontalSensitivity = m_siriRemoteHorizontalSensitivity;
+@synthesize siriRemoteVerticalSensitivity = m_siriRemoteVerticalSensitivity;
 
 - (void)setSiriRemoteIdleTimer:(bool)idle
 {
