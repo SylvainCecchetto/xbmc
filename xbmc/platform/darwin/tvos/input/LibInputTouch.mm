@@ -209,20 +209,11 @@
 
 - (void)menuPressed:(UITapGestureRecognizer*)sender
 {
-  switch (sender.state)
+  if (sender.state == UIGestureRecognizerStateEnded)
   {
-    case UIGestureRecognizerStateBegan:
-      break;
-    case UIGestureRecognizerStateChanged:
-      break;
-    case UIGestureRecognizerStateEnded:
-      [g_xbmcController.inputHandler sendButtonPressed:6];
-
-      // start remote timeout
-      [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
-      break;
-    default:
-      break;
+    CLog::Log(LOGDEBUG, "Input: Siri remote menu press (id: 6)");
+    [g_xbmcController.inputHandler sendButtonPressed:6];
+    [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
   }
 }
 
@@ -230,39 +221,29 @@
 {
   if (sender.state == UIGestureRecognizerStateBegan)
   {
+    CLog::Log(LOGDEBUG, "Input: Siri remote select long press (id: 7)");
     [g_xbmcController.inputHandler sendButtonPressed:7];
-    [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+    [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
   }
 }
 
 - (void)SiriSelectHandler:(UITapGestureRecognizer*)sender
 {
-  CLog::Log(LOGDEBUG, "SiriSelectHandler");
-  switch (sender.state)
+  if (sender.state == UIGestureRecognizerStateEnded)
   {
-    case UIGestureRecognizerStateEnded:
-      [g_xbmcController.inputHandler sendButtonPressed:5];
-      break;
-    default:
-      break;
+    CLog::Log(LOGDEBUG, "Input: Siri remote select press (id: 5)");
+    [g_xbmcController.inputHandler sendButtonPressed:5];
+    [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
   }
 }
 
 - (void)playPausePressed:(UITapGestureRecognizer*)sender
 {
-  switch (sender.state)
+  if (sender.state == UIGestureRecognizerStateEnded)
   {
-    case UIGestureRecognizerStateBegan:
-      break;
-    case UIGestureRecognizerStateChanged:
-      break;
-    case UIGestureRecognizerStateEnded:
-      [g_xbmcController.inputHandler sendButtonPressed:12];
-      // start remote timeout
-      [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
-      break;
-    default:
-      break;
+    CLog::Log(LOGDEBUG, "Input: Siri remote play/pause press (id: 12)");
+    [g_xbmcController.inputHandler sendButtonPressed:12];
+    [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
   }
 }
 
@@ -286,6 +267,7 @@
 
 - (IBAction)IRRemoteUpArrowPressed:(UIGestureRecognizer*)sender
 {
+  CLog::Log(LOGDEBUG, "Input: IR remote up press (id: 1)");
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -295,8 +277,7 @@
       break;
     case UIGestureRecognizerStateEnded:
       [g_xbmcController.inputHandler.inputRemote stopKeyPressTimer];
-      // start remote timeout
-      [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+      [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
       break;
     default:
       break;
@@ -305,6 +286,7 @@
 
 - (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer*)sender
 {
+  CLog::Log(LOGDEBUG, "Input: IR remote down press (id: 2)");
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -314,8 +296,7 @@
       break;
     case UIGestureRecognizerStateEnded:
       [g_xbmcController.inputHandler.inputRemote stopKeyPressTimer];
-      // start remote timeout
-      [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+      [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
       break;
     default:
       break;
@@ -324,6 +305,7 @@
 
 - (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer*)sender
 {
+  CLog::Log(LOGDEBUG, "Input: IR remote left press (id: 3)");
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -333,8 +315,7 @@
       break;
     case UIGestureRecognizerStateEnded:
       [g_xbmcController.inputHandler.inputRemote stopKeyPressTimer];
-      // start remote timeout
-      [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+      [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
       break;
     default:
       break;
@@ -343,6 +324,7 @@
 
 - (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer*)sender
 {
+  CLog::Log(LOGDEBUG, "Input: IR remote right press (id: 3)");
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -352,8 +334,7 @@
       break;
     case UIGestureRecognizerStateEnded:
       [g_xbmcController.inputHandler.inputRemote stopKeyPressTimer];
-      // start remote timeout
-      [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+      [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
       break;
     default:
       break;
@@ -364,47 +345,51 @@
 
 - (IBAction)tapUpArrowPressed:(UIGestureRecognizer*)sender
 {
-  if (!g_xbmcController.inputHandler.inputRemote.remoteIdleState)
+  CLog::Log(LOGDEBUG, "Input: Siri remote tap up (id: 1)");
+  if (!g_xbmcController.inputHandler.inputRemote.siriRemoteIdleState)
     [g_xbmcController.inputHandler sendButtonPressed:1];
 
-  [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+  [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
 }
 
 - (IBAction)tapDownArrowPressed:(UIGestureRecognizer*)sender
 {
-  if (!g_xbmcController.inputHandler.inputRemote.remoteIdleState)
+  CLog::Log(LOGDEBUG, "Input: Siri remote tap down (id: 2)");
+  if (!g_xbmcController.inputHandler.inputRemote.siriRemoteIdleState)
     [g_xbmcController.inputHandler sendButtonPressed:2];
 
-  [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+  [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
 }
 
 - (IBAction)tapLeftArrowPressed:(UIGestureRecognizer*)sender
 {
-  if (!g_xbmcController.inputHandler.inputRemote.remoteIdleState)
+  CLog::Log(LOGDEBUG, "Input: Siri remote tap left (id: 3)");
+  if (!g_xbmcController.inputHandler.inputRemote.siriRemoteIdleState)
     [g_xbmcController.inputHandler sendButtonPressed:3];
 
-  [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+  [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
 }
 
 - (IBAction)tapRightArrowPressed:(UIGestureRecognizer*)sender
 {
-  if (!g_xbmcController.inputHandler.inputRemote.remoteIdleState)
+  CLog::Log(LOGDEBUG, "Input: Siri remote tap right (id: 4)");
+  if (!g_xbmcController.inputHandler.inputRemote.siriRemoteIdleState)
     [g_xbmcController.inputHandler sendButtonPressed:4];
 
-  [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+  [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
 }
 
 #pragma mark - Pan
 
 - (IBAction)handlePan:(UIPanGestureRecognizer*)sender
 {
-  if (g_xbmcController.inputHandler.inputRemote.remoteIdleState)
+  if (g_xbmcController.inputHandler.inputRemote.siriRemoteIdleState)
     return;
 
   if (!g_xbmcController.appAlive) //NO GESTURES BEFORE WE ARE UP AND RUNNING
     return;
 
-  if ([g_xbmcController.inputHandler.inputSettings useSiriRemote])
+  if ([g_xbmcController.inputHandler.inputSettings siriRemotePanEnabled])
   {
     static UIPanGestureRecognizerDirection direction = UIPanGestureRecognizerDirectionUndefined;
     // speed       == how many clicks full swipe will give us(1000x1000px)
@@ -513,7 +498,7 @@
       {
         direction = UIPanGestureRecognizerDirectionUndefined;
         // start remote idle timer
-        [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+        [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
         break;
       }
       default:
@@ -574,7 +559,7 @@
           [g_xbmcController.inputHandler.inputRemote stopKeyPressTimer];
         }
         // start remote idle timer
-        [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+        [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
         break;
       }
       default:
@@ -585,11 +570,11 @@
 
 - (IBAction)handleSwipe:(UISwipeGestureRecognizer*)sender
 {
-  if (!g_xbmcController.inputHandler.inputRemote.remoteIdleState)
+  if (!g_xbmcController.inputHandler.inputRemote.siriRemoteIdleState)
     m_touchDirection = sender.direction;
 
   // start remote idle timer
-  [g_xbmcController.inputHandler.inputRemote startRemoteTimer];
+  [g_xbmcController.inputHandler.inputRemote startSiriRemoteIdleTimer];
 }
 
 - (UIPanGestureRecognizerDirection)getPanDirection:(CGPoint)translation
